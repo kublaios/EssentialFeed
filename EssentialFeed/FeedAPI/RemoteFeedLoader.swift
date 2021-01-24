@@ -38,11 +38,11 @@ public class RemoteFeedLoader {
         self.client.get(from: self.url) { (result) in
             switch result {
             case let .success(data, response):
-                if response.statusCode == 200,
-                   let root = try? JSONDecoder.init().decode(Root.self, from: data)
-                {
-                    completion(.success(root.items.map({ $0.feedItem })))
-                } else {
+                do {
+                    let items = try FeedItemsMapper.map(data, response)
+                    completion(.success(items))
+                }
+                catch {
                     completion(.failure(.invalidData))
                 }
             case .failure:
@@ -52,29 +52,41 @@ public class RemoteFeedLoader {
     }
 }
 
-private struct Root: Decodable {
-    let items: [Item]
-}
+private class FeedItemsMapper {
 
-private struct Item {
-    let id: UUID
-    let description: String?
-    let location: String?
-    let imageURL: URL
-
-    var feedItem: FeedItem {
-        return FeedItem(id: self.id,
-                        description: self.description,
-                        location: self.location,
-                        imageURL: self.imageURL)
+    private struct Root: Decodable {
+        let items: [Item]
     }
-}
 
-extension Item: Decodable {
-    private enum CodingKeys: String, CodingKey {
-        case id
-        case description
-        case location
-        case imageURL = "image"
+    private struct Item: Decodable {
+        let id: UUID
+        let description: String?
+        let location: String?
+        let imageURL: URL
+
+        var feedItem: FeedItem {
+            return FeedItem(id: self.id,
+                            description: self.description,
+                            location: self.location,
+                            imageURL: self.imageURL)
+        }
+
+        private enum CodingKeys: String, CodingKey {
+            case id
+            case description
+            case location
+            case imageURL = "image"
+        }
     }
+
+    static func map(_ data: Data, _ response: HTTPURLResponse) throws -> [FeedItem] {
+        guard response.statusCode == 200
+        else {
+            throw RemoteFeedLoader.Error.invalidData
+        }
+
+        let root = try JSONDecoder.init().decode(Root.self, from: data)
+        return root.items.map({ $0.feedItem })
+    }
+
 }
