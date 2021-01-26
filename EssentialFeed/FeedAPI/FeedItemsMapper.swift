@@ -10,7 +10,10 @@ import Foundation
 public final class FeedItemsMapper {
 
     private struct Root: Decodable {
-        let items: [Item]
+        private let items: [Item]
+        public var feedItems: [FeedItem] {
+            return self.items.map({ $0.feedItem })
+        }
     }
 
     private struct Item: Decodable {
@@ -43,8 +46,7 @@ public final class FeedItemsMapper {
             return .failure(.invalidData)
         }
 
-        let items = root.items.map({ $0.feedItem })
-        return .success(items)
+        return .success(root.feedItems)
     }
 
 }
