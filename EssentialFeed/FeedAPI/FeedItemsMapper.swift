@@ -37,19 +37,14 @@ public final class FeedItemsMapper {
     private static let OK_200 = 200
 
     public static func map(_ data: Data, _ response: HTTPURLResponse) -> RemoteFeedLoader.Result {
-        guard response.statusCode == Self.OK_200
+        guard response.statusCode == Self.OK_200,
+              let root = try? JSONDecoder.init().decode(Root.self, from: data)
         else {
             return .failure(.invalidData)
         }
 
-        do {
-            let root = try JSONDecoder.init().decode(Root.self, from: data)
-            let items = root.items.map({ $0.feedItem })
-            return .success(items)
-        }
-        catch {
-            return .failure(.invalidData)
-        }
+        let items = root.items.map({ $0.feedItem })
+        return .success(items)
     }
 
 }
