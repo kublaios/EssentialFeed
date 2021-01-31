@@ -9,10 +9,18 @@ import XCTest
 import EssentialFeed
 
 // Production code
-class URLSessionHTTPClient {
-    let session: URLSession
+protocol HTTPSession {
+    func dataTask(with url: URL, completionHandler: @escaping (Data?, URLResponse?, Error?) -> Void) -> HTTPSessionTask
+}
 
-    init(session: URLSession) {
+protocol HTTPSessionTask {
+    func resume()
+}
+
+class URLSessionHTTPClient {
+    let session: HTTPSession
+
+    init(session: HTTPSession) {
         self.session = session
     }
 
@@ -65,23 +73,22 @@ class URLSessionHTTPClientTests: XCTestCase {
 
 }
 
-class URLSessionSpy: URLSession {
+class URLSessionSpy: HTTPSession {
     var stubs: [URL: Stub] = [:]
 
     struct Stub {
-        let task: URLSessionDataTask
+        let task: HTTPSessionTask
         let error: Error?
     }
 
-    override init() { }
+    init() { }
 
-    func stub(url: URL, task: URLSessionDataTask, error: Error? = nil) {
+    func stub(url: URL, task: HTTPSessionTask, error: Error? = nil) {
         self.stubs[url] = Stub(task: task, error: error)
     }
 
-    override func dataTask(with url: URL,
-                           completionHandler: @escaping (Data?, URLResponse?, Error?) -> Void)
-    -> URLSessionDataTask
+    func dataTask(with url: URL, completionHandler: @escaping (Data?, URLResponse?, Error?) -> Void)
+    -> HTTPSessionTask
     {
         guard let stub = self.stubs[url]
         else {
@@ -92,16 +99,17 @@ class URLSessionSpy: URLSession {
     }
 }
 
-class FakeURLSessionDataTask: URLSessionDataTask {
-    override init() { }
+class FakeURLSessionDataTask: HTTPSessionTask {
+    init() { }
+    func resume() { }
 }
 
-class URLSessionDataTaskSpy: URLSessionDataTask {
+class URLSessionDataTaskSpy: HTTPSessionTask {
     var resumeCallCount: Int = 0
 
-    override init() { }
+    init() { }
 
-    override func resume() {
+    func resume() {
         self.resumeCallCount += 1
     }
 }
