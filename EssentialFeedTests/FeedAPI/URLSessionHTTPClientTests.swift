@@ -12,14 +12,20 @@ import EssentialFeed
 class URLSessionHTTPClient {
     let session: URLSession
 
+    struct UnexpectedValuesRepresentation: Error { }
+
     init(session: URLSession = .shared) {
         self.session = session
     }
 
     func get(from url: URL, completion: @escaping (HTTPClientResult) -> Void) {
-        self.session.dataTask(with: url) { (_, _, error) in
+        self.session.dataTask(with: url) { (data, response, error) in
             if let e = error {
                 completion(.failure(e))
+            } else if let d = data, !d.isEmpty { // 204 can return no-data with valid HTTP code
+            } else if let _ = response {
+            } else {
+                completion(.failure(UnexpectedValuesRepresentation()))
             }
         }.resume()
     }
@@ -66,6 +72,25 @@ class URLSessionHTTPClientTests: XCTestCase {
                 XCTAssertEqual(error, expectedError)
             default:
                 XCTFail("Expected failure with error \(expectedError), received \(result) instead")
+            }
+            exp.fulfill()
+        }
+
+        self.wait(for: [exp], timeout: 1.0)
+    }
+
+    func test_getFromURL_failsWhenAllValuesAreNil() {
+        let url = self.anyURL()
+        let sut = self.makeSUT()
+
+        let exp = self.expectation(description: "Wait for completion")
+        URLProtocolStub.stub(data: nil, response: nil, error: nil)
+        sut.get(from: url) { (result) in
+            switch result {
+            case .failure:
+                break
+            default:
+                XCTFail("Expected failure, got \(result) instead")
             }
             exp.fulfill()
         }
