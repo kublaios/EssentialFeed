@@ -22,8 +22,6 @@ class URLSessionHTTPClient {
         self.session.dataTask(with: url) { (data, response, error) in
             if let e = error {
                 completion(.failure(e))
-            } else if let d = data, !d.isEmpty { // 204 can return no-data with valid HTTP code
-            } else if let _ = response {
             } else {
                 completion(.failure(UnexpectedValuesRepresentation()))
             }
@@ -78,6 +76,10 @@ class URLSessionHTTPClientTests: XCTestCase {
         XCTAssertNotNil(self.resultErrorFor(data: self.anyData(), response: self.nonHTTPURLResponse(), error: nil))
     }
 
+    func test_getFromURL_deliversDataAndResponse() {
+
+    }
+
     // MARK: Private methods
 
     private func makeSUT(file: StaticString = #filePath, line: UInt = #line) -> URLSessionHTTPClient {
@@ -116,7 +118,7 @@ class URLSessionHTTPClientTests: XCTestCase {
         let url = self.anyURL()
         let sut = self.makeSUT(file: file, line: line)
 
-        URLProtocolStub.stub(data: nil, response: nil, error: expectedError)
+        URLProtocolStub.stub(data: data, response: response, error: expectedError)
         var capturedError: Error?
         let exp = self.expectation(description: "Wait for get(from:) completion")
         sut.get(from: url) { (result) in
