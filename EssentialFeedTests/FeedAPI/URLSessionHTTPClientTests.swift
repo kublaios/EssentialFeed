@@ -22,6 +22,10 @@ class URLSessionHTTPClient {
         self.session.dataTask(with: url) { (data, response, error) in
             if let e = error {
                 completion(.failure(e))
+            } else if let d = data, !d.isEmpty, // 204 can return no-data with valid HTTP code
+                      let r = response as? HTTPURLResponse
+            {
+                completion(.success(d, r))
             } else {
                 completion(.failure(UnexpectedValuesRepresentation()))
             }
@@ -77,7 +81,26 @@ class URLSessionHTTPClientTests: XCTestCase {
     }
 
     func test_getFromURL_deliversDataAndResponse() {
+        let expectedData = self.anyData()
+        let expectedResponse = self.anyHTTPURLResponse()
+        let url = self.anyURL()
+        let sut = self.makeSUT()
 
+        URLProtocolStub.stub(data: expectedData, response: expectedResponse, error: nil)
+        let exp = self.expectation(description: "Wait for get(from:) completion")
+        sut.get(from: url) { (result) in
+            switch result {
+            case let .success(receivedData, receivedResponse):
+                XCTAssertEqual(expectedData, receivedData)
+                XCTAssertEqual(expectedResponse.url, receivedResponse.url)
+                XCTAssertEqual(expectedResponse.statusCode, receivedResponse.statusCode)
+            default:
+                XCTFail("Expected success, got \(result) instead")
+            }
+            exp.fulfill()
+        }
+
+        self.wait(for: [exp], timeout: 1.0)
     }
 
     // MARK: Private methods
