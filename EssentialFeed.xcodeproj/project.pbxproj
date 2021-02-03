@@ -12,6 +12,7 @@
 		3E1A4E2125C8585400281EBA /* URLSessionHTTPClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E1A4E2025C8585400281EBA /* URLSessionHTTPClient.swift */; };
 		3E294EC525CA96FE00DBD681 /* EssentialFeedAPIEndToEndTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E294EC425CA96FE00DBD681 /* EssentialFeedAPIEndToEndTests.swift */; };
 		3E294EC725CA96FE00DBD681 /* EssentialFeed.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3EFB890525BC7DDA00D712F4 /* EssentialFeed.framework */; };
+		3E294ED025CA9BDA00DBD681 /* XCTestCase+MemoryLeakTracking.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E1A4E0F25C8251E00281EBA /* XCTestCase+MemoryLeakTracking.swift */; };
 		3E52A37D25C0BD8B00633B78 /* HTTPClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E52A37C25C0BD8B00633B78 /* HTTPClient.swift */; };
 		3E52A38125C0BDA700633B78 /* FeedItemsMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E52A38025C0BDA700633B78 /* FeedItemsMapper.swift */; };
 		3EFB890F25BC7DDA00D712F4 /* EssentialFeed.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3EFB890525BC7DDA00D712F4 /* EssentialFeed.framework */; };
@@ -88,12 +89,12 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		3E1A4E0E25C8250000281EBA /* Helpers */ = {
+		3E1A4E0E25C8250000281EBA /* Helpers (Shared) */ = {
 			isa = PBXGroup;
 			children = (
 				3E1A4E0F25C8251E00281EBA /* XCTestCase+MemoryLeakTracking.swift */,
 			);
-			path = Helpers;
+			path = "Helpers (Shared)";
 			sourceTree = "<group>";
 		};
 		3E294EC325CA96FE00DBD681 /* EssentialFeedAPIEndToEndTests */ = {
@@ -151,7 +152,7 @@
 			children = (
 				3EFB891525BC7DDA00D712F4 /* Info.plist */,
 				3E52A38425C0C6FB00633B78 /* FeedAPI */,
-				3E1A4E0E25C8250000281EBA /* Helpers */,
+				3E1A4E0E25C8250000281EBA /* Helpers (Shared) */,
 			);
 			path = EssentialFeedTests;
 			sourceTree = "<group>";
@@ -317,6 +318,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				3E294EC525CA96FE00DBD681 /* EssentialFeedAPIEndToEndTests.swift in Sources */,
+				3E294ED025CA9BDA00DBD681 /* XCTestCase+MemoryLeakTracking.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
