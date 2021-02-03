@@ -185,7 +185,6 @@ private class URLProtocolStub: URLProtocol {
     }
 
     override class func canInit(with request: URLRequest) -> Bool {
-        Self.requestObserver?(request)
         return true
     }
 
@@ -194,6 +193,13 @@ private class URLProtocolStub: URLProtocol {
     }
 
     override func startLoading() {
+        guard Self.requestObserver == nil
+        else {
+            Self.requestObserver?(self.request)
+            self.client?.urlProtocolDidFinishLoading(self)
+            return
+        }
+
         if let data = Self.stub?.data {
             self.client?.urlProtocol(self, didLoad: data)
         }
