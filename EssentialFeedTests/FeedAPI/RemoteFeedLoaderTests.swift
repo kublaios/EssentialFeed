@@ -166,6 +166,8 @@ class RemoteFeedLoaderTests: XCTestCase {
         return .failure(error)
     }
 
+    // MARK: Nested type `HTTPClientSpy`
+
     private class HTTPClientSpy: HTTPClient {
         private var messages: [(url: URL, completion: (HTTPClientResult) -> Void)] = []
         var requestedURLs: [URL] {

@@ -24,7 +24,7 @@ class EssentialFeedAPIEndToEndTests: XCTestCase {
             XCTAssertEqual(items[6], self.item(at: 6), "Unexpected item at index \(6)")
             XCTAssertEqual(items[7], self.item(at: 7), "Unexpected item at index \(7)")
         case .failure(let error):
-            XCTFail("Expected feed items, received \(error) instead")
+            XCTFail("Expected feed items, received \(error) error instead")
         default:
             XCTFail("Expected feed items, received no response instead")
         }
