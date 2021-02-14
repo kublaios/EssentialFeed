@@ -114,8 +114,8 @@
 		3E26A62525D9CA7D009F88A7 /* FeedCache */ = {
 			isa = PBXGroup;
 			children = (
-				3E26A62625D9CA89009F88A7 /* LocalFeedLoader.swift */,
 				3E26A62B25D9CAB1009F88A7 /* FeedStore.swift */,
+				3E26A62625D9CA89009F88A7 /* LocalFeedLoader.swift */,
 			);
 			path = FeedCache;
 			sourceTree = "<group>";
