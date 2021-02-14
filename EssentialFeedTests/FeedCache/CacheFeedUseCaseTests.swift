@@ -17,11 +17,12 @@ class LocalFeedLoader {
         self.timestampProvider = timestampProvider
     }
 
-    func save(_ items: [FeedItem]) {
+    func save(_ items: [FeedItem], completion: @escaping (Error?) -> Void) {
         self.store.deleteCachedFeed { [unowned self] (error) in
             if error == nil {
                 self.store.insertCache(items, timestamp: self.timestampProvider())
             }
+            completion(error)
         }
     }
 }
@@ -67,7 +68,7 @@ class CacheFeedUseCaseTests: XCTestCase {
     func test_save_requestsCacheDeletion() {
         let items = [self.uniqueItem(), self.uniqueItem()]
         let (sut, store) = self.makeSUT()
-        sut.save(items)
+        sut.save(items) { _ in }
         XCTAssertEqual(store.requestedCommands, [.deleteCachedFeed])
     }
 
@@ -76,7 +77,7 @@ class CacheFeedUseCaseTests: XCTestCase {
         let (sut, store) = self.makeSUT()
         let deletionError = self.anyNSError()
 
-        sut.save(items)
+        sut.save(items) { _ in }
         store.completeDeletion(with: deletionError)
 
         XCTAssertEqual(store.requestedCommands, [.deleteCachedFeed])
@@ -87,10 +88,28 @@ class CacheFeedUseCaseTests: XCTestCase {
         let timestamp = Date()
         let (sut, store) = self.makeSUT(timestampProvider: { timestamp })
 
-        sut.save(items)
+        sut.save(items) { _ in }
         store.completeDeletionSuccessfully()
 
         XCTAssertEqual(store.requestedCommands, [.deleteCachedFeed, .insertCache(items, timestamp)])
+    }
+
+    func test_save_fails_onDeletionError() {
+        let items = [self.uniqueItem(), self.uniqueItem()]
+        let (sut, store) = self.makeSUT()
+        let deletionError = self.anyNSError()
+
+        var capturedError: Error?
+        let exp = self.expectation(description: "Wait for save_fails_onDeletionError")
+        sut.save(items) { error in
+            capturedError = error
+            exp.fulfill()
+        }
+        store.completeDeletion(with: deletionError)
+
+        self.wait(for: [exp], timeout: 1.0)
+
+        XCTAssertEqual(capturedError as NSError?, deletionError)
     }
 
     // MARK: Private methods
