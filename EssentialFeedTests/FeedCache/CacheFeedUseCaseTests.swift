@@ -20,7 +20,7 @@ class LocalFeedLoader {
     func save(_ items: [FeedItem]) {
         self.store.deleteCachedFeed { [unowned self] (error) in
             if error == nil {
-                self.store.cache(items, timestamp: self.timestampProvider())
+                self.store.insertCache(items, timestamp: self.timestampProvider())
             }
         }
     }
@@ -35,7 +35,7 @@ class FeedStore {
     }
 
     var deletionCompletions: [DeletionCompletion] = []
-    var insertions: [(items: [FeedItem], timestamp: Date)] = []
+    var cacheInsertions: [(items: [FeedItem], timestamp: Date)] = []
     private(set) var requestedCommands: [RequestedCommand] = []
 
     func deleteCachedFeed(completion: @escaping DeletionCompletion) {
@@ -51,8 +51,8 @@ class FeedStore {
         self.deletionCompletions[index](nil)
     }
 
-    func cache(_ items: [FeedItem], timestamp: Date) {
-        self.insertions.append((items, timestamp))
+    func insertCache(_ items: [FeedItem], timestamp: Date) {
+        self.cacheInsertions.append((items, timestamp))
         self.requestedCommands.append(.insertCache(items, timestamp))
     }
 }
