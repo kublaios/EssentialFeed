@@ -8,42 +8,6 @@
 import XCTest
 import EssentialFeed
 
-class LocalFeedLoader {
-    let store: FeedStore
-    let timestampProvider: () -> Date
-
-    init(store: FeedStore, timestampProvider: @escaping () -> Date) {
-        self.store = store
-        self.timestampProvider = timestampProvider
-    }
-
-    func save(_ items: [FeedItem], completion: @escaping (Error?) -> Void) {
-        self.store.deleteCachedFeed { [weak self] (error) in
-            guard let self = self else { return }
-            if let deletionError = error {
-                completion(deletionError)
-            } else {
-                self.cache(items, completion: completion)
-            }
-        }
-    }
-
-    private func cache(_ items: [FeedItem], completion: @escaping (Error?) -> Void) {
-        self.store.insertCache(items, timestamp: self.timestampProvider()) { [weak self] (error) in
-            guard self != nil else { return }
-            completion(error)
-        }
-    }
-}
-
-protocol FeedStore {
-    typealias DeletionCompletion = (Error?) -> Void
-    typealias InsertionCompletion = (Error?) -> Void
-
-    func deleteCachedFeed(completion: @escaping DeletionCompletion)
-    func insertCache(_ items: [FeedItem], timestamp: Date, completion: @escaping InsertionCompletion)
-}
-
 class FeedStoreSpy: FeedStore {
 
     enum RequestedCommand: Equatable {
