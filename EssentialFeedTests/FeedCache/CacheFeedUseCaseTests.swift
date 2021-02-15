@@ -12,12 +12,12 @@ class FeedStoreSpy: FeedStore {
 
     enum RequestedCommand: Equatable {
         case deleteCachedFeed
-        case insertCache([FeedItem], Date)
+        case insertCache([LocalFeedItem], Date)
     }
 
     var deletionCompletions: [DeletionCompletion] = []
     var insertionCompletions: [InsertionCompletion] = []
-    var cacheInsertions: [(items: [FeedItem], timestamp: Date)] = []
+    var cacheInsertions: [(items: [LocalFeedItem], timestamp: Date)] = []
     private(set) var requestedCommands: [RequestedCommand] = []
 
     func deleteCachedFeed(completion: @escaping DeletionCompletion) {
@@ -33,7 +33,7 @@ class FeedStoreSpy: FeedStore {
         self.deletionCompletions[index](nil)
     }
 
-    func insertCache(_ items: [FeedItem], timestamp: Date, completion: @escaping InsertionCompletion) {
+    func insertCache(_ items: [LocalFeedItem], timestamp: Date, completion: @escaping InsertionCompletion) {
         self.insertionCompletions.append(completion)
         self.cacheInsertions.append((items, timestamp))
         self.requestedCommands.append(.insertCache(items, timestamp))
@@ -75,13 +75,14 @@ class CacheFeedUseCaseTests: XCTestCase {
 
     func test_save_requestsInsertionWithTimestamp_onSuccessfulDeletion() {
         let items = [self.uniqueItem(), self.uniqueItem()]
+        let localItems = items.map({ LocalFeedItem(id: $0.id, description: $0.description, location: $0.location, imageURL: $0.imageURL) })
         let timestamp = Date()
         let (sut, store) = self.makeSUT(timestampProvider: { timestamp })
 
         sut.save(items) { _ in }
         store.completeDeletionSuccessfully()
 
-        XCTAssertEqual(store.requestedCommands, [.deleteCachedFeed, .insertCache(items, timestamp)])
+        XCTAssertEqual(store.requestedCommands, [.deleteCachedFeed, .insertCache(localItems, timestamp)])
     }
 
     func test_save_fails_onDeletionError() {
