@@ -81,7 +81,7 @@ class LoadFeedFromRemoteUseCaseTests: XCTestCase {
                                       location: "a location",
                                       imageURL: URL(string: "https://another-image-url.com")!)
 
-        self.expect(sut, toCompleteWithResult: .success([item1.item, item2.item])) {
+        self.expect(sut, toCompleteWithResult: .success([item1.model, item2.model])) {
             let jsonData = self.makeFeedItemsJSON(itemJSONs: [item1.itemJSON, item2.itemJSON])
             client.complete(withStatusCode: 200, data: jsonData)
         }
@@ -117,14 +117,14 @@ class LoadFeedFromRemoteUseCaseTests: XCTestCase {
                               description: String? = nil,
                               location: String? = nil,
                               imageURL: URL)
-    -> (item: FeedItem, itemJSON: [String: Any])
+    -> (model: FeedImage, itemJSON: [String: Any])
     {
-        let item = FeedItem(id: id, description: description, location: location, imageURL: imageURL)
+        let item = FeedImage(id: id, description: description, location: location, url: imageURL)
         let itemJSON = [
             "id": item.id.uuidString,
             "description": item.description,
             "location": item.location,
-            "image": item.imageURL.absoluteString,
+            "image": item.url.absoluteString,
         ].reduce(into: [String: Any](), { (acc, el) in
             if (el.value != nil) { acc[el.key] = el.value }
         })
