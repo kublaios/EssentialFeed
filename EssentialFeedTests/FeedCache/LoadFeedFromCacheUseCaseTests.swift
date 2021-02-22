@@ -15,6 +15,14 @@ class LoadFeedFromCacheUseCaseTests: XCTestCase {
         XCTAssertEqual(store.requestedCommands, [])
     }
 
+    func test_load_requestsCacheRetrieval() {
+        let (sut, store) = self.makeSUT()
+
+        sut.load()
+
+        XCTAssertEqual(store.requestedCommands, [.retrieve])
+    }
+
     // MARK: Private methods
 
     private func makeSUT(timestampProvider: @escaping () -> Date = Date.init,
