@@ -82,6 +82,15 @@ class LoadFeedFromCacheUseCaseTests: XCTestCase {
         XCTAssertEqual(store.requestedCommands, [.retrieve, .deleteCachedFeed])
     }
 
+    func test_load_doesNotDeleteCache_whenCacheIsEmpty() {
+        let (sut, store) = self.makeSUT()
+
+        sut.load { _ in }
+        store.completeRetrievalWithEmptyCache()
+
+        XCTAssertEqual(store.requestedCommands, [.retrieve])
+    }
+
     // MARK: Private methods
 
     private func makeSUT(timestampProvider: @escaping () -> Date = Date.init,
