@@ -29,8 +29,13 @@ class LoadFeedFromCacheUseCaseTests: XCTestCase {
         let exp = self.expectation(description: "failsOnRetrievalError waiting for LocalFeedLoader.load")
 
         var receivedError: Error?
-        sut.load { (error) in
-            receivedError = error
+        sut.load { (result) in
+            switch result {
+            case let .failure(error):
+                receivedError = error
+            default:
+                XCTFail("failsOnRetrievalError expects \(retrievalError), received \(result) instead")
+            }
             exp.fulfill()
         }
 
