@@ -16,16 +16,16 @@ class CacheFeedUseCaseTests: XCTestCase {
     }
 
     func test_save_requestsCacheDeletion() {
-        let feed = self.uniqueImagesFeed().models
+        let feed = uniqueImagesFeed().models
         let (sut, store) = self.makeSUT()
         sut.save(feed) { _ in }
         XCTAssertEqual(store.requestedCommands, [.deleteCachedFeed])
     }
 
     func test_save_doesNotRequestCacheInsertion_onDeletionError() {
-        let feed = self.uniqueImagesFeed().models
+        let feed = uniqueImagesFeed().models
         let (sut, store) = self.makeSUT()
-        let deletionError = self.anyNSError()
+        let deletionError = anyNSError()
 
         sut.save(feed) { _ in }
         store.completeDeletion(with: deletionError)
@@ -34,7 +34,7 @@ class CacheFeedUseCaseTests: XCTestCase {
     }
 
     func test_save_requestsInsertionWithTimestamp_onSuccessfulDeletion() {
-        let (feed, localFeed) = self.uniqueImagesFeed()
+        let (feed, localFeed) = uniqueImagesFeed()
         let timestamp = Date()
         let (sut, store) = self.makeSUT(timestampProvider: { timestamp })
 
@@ -46,7 +46,7 @@ class CacheFeedUseCaseTests: XCTestCase {
 
     func test_save_fails_onDeletionError() {
         let (sut, store) = self.makeSUT()
-        let deletionError = self.anyNSError()
+        let deletionError = anyNSError()
         self.expect(sut, toCompleteWithError: deletionError) {
             store.completeDeletion(with: deletionError)
         }
@@ -54,7 +54,7 @@ class CacheFeedUseCaseTests: XCTestCase {
 
     func test_save_fails_onInsertionError() {
         let (sut, store) = self.makeSUT()
-        let insertionError = self.anyNSError()
+        let insertionError = anyNSError()
         self.expect(sut, toCompleteWithError: insertionError) {
             store.completeDeletionSuccessfully()
             store.completeInsertion(with: insertionError)
@@ -74,11 +74,11 @@ class CacheFeedUseCaseTests: XCTestCase {
         var sut: LocalFeedLoader? = LocalFeedLoader.init(store: store, timestampProvider: Date.init)
 
         var capturedResults: [LocalFeedLoader.SaveResult] = []
-        sut?.save(self.uniqueImagesFeed().models, completion: { (error) in
+        sut?.save(uniqueImagesFeed().models, completion: { (error) in
             capturedResults.append(error)
         })
         sut = nil
-        store.completeDeletion(with: self.anyNSError())
+        store.completeDeletion(with: anyNSError())
 
         XCTAssert(capturedResults.isEmpty)
     }
@@ -88,12 +88,12 @@ class CacheFeedUseCaseTests: XCTestCase {
         var sut: LocalFeedLoader? = LocalFeedLoader.init(store: store, timestampProvider: Date.init)
 
         var capturedResults: [LocalFeedLoader.SaveResult] = []
-        sut?.save(self.uniqueImagesFeed().models, completion: { (error) in
+        sut?.save(uniqueImagesFeed().models, completion: { (error) in
             capturedResults.append(error)
         })
         store.completeDeletionSuccessfully()
         sut = nil
-        store.completeInsertion(with: self.anyNSError())
+        store.completeInsertion(with: anyNSError())
 
         XCTAssert(capturedResults.isEmpty)
     }
@@ -120,7 +120,7 @@ class CacheFeedUseCaseTests: XCTestCase {
     {
         var capturedError: Error?
         let exp = self.expectation(description: "Wait for save completion")
-        sut.save(self.uniqueImagesFeed().models) { error in
+        sut.save(uniqueImagesFeed().models) { error in
             capturedError = error
             exp.fulfill()
         }
@@ -130,24 +130,6 @@ class CacheFeedUseCaseTests: XCTestCase {
         self.wait(for: [exp], timeout: 1.0)
 
         XCTAssertEqual(capturedError as NSError?, expectedError)
-    }
-
-    private func uniqueImage() -> FeedImage {
-        return FeedImage(id: UUID(), description: "a-desc", location: "a-loc", url: self.anyURL())
-    }
-
-    private func uniqueImagesFeed() -> (models: [FeedImage], local: [LocalFeedImage]) {
-        let models = [self.uniqueImage(), self.uniqueImage()]
-        let localImages = models.map({ LocalFeedImage(id: $0.id, description: $0.description, location: $0.location, url: $0.url) })
-        return (models, localImages)
-    }
-
-    private func anyURL() -> URL {
-        return URL(string: "https://any-url.com")!
-    }
-
-    private func anyNSError() -> NSError {
-        return NSError.init(domain: "any-error", code: 0)
     }
 
 }
