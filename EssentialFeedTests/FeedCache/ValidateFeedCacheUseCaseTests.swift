@@ -24,7 +24,7 @@ class ValidateFeedCacheUseCaseTests: XCTestCase {
         XCTAssertEqual(store.requestedCommands, [.retrieve, .deleteCachedFeed])
     }
 
-    func test_validateCache_doesNotDeleteCache_whenCacheIsEmpty() {
+    func test_validateCache_doesNotDeleteEmptyCache() {
         let (sut, store) = self.makeSUT()
 
         sut.validateCache()
@@ -33,7 +33,7 @@ class ValidateFeedCacheUseCaseTests: XCTestCase {
         XCTAssertEqual(store.requestedCommands, [.retrieve])
     }
 
-    func test_validateCache_doesNotDeleteCache_whenCacheIsLessThanSevenDaysOld() {
+    func test_validateCache_doesNotDeleteLessThanSevenDaysOldCache() {
         let fixedCurrentDate = Date()
         let feed = self.uniqueImagesFeed()
         let lessThanSevenDaysOldTimestamp = fixedCurrentDate.adding(days: -7).adding(seconds: 1)
