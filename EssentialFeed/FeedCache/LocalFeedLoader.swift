@@ -8,9 +8,6 @@
 import Foundation
 
 public final class LocalFeedLoader {
-    public typealias SaveResult = Error?
-    public typealias LoadResult = LoadFeedResult
-
     private let store: FeedStore
     private let timestampProvider: () -> Date
     private let calendar = Calendar(identifier: .gregorian)
@@ -23,6 +20,18 @@ public final class LocalFeedLoader {
         self.timestampProvider = timestampProvider
     }
 
+    private func validateTimestamp(_ timestamp: Date) -> Bool {
+        guard let maxCacheAge = self.calendar.date(byAdding: .day, value: self.maxCacheAgeInDays, to: timestamp)
+        else { return false }
+
+        let currentDate = self.timestampProvider()
+        return currentDate < maxCacheAge
+    }
+}
+
+extension LocalFeedLoader {
+    public typealias SaveResult = Error?
+
     public func save(_ feed: [FeedImage], completion: @escaping (SaveResult) -> Void) {
         self.store.deleteCachedFeed { [weak self] (error) in
             guard let self = self else { return }
@@ -33,6 +42,17 @@ public final class LocalFeedLoader {
             }
         }
     }
+
+    private func cache(_ feed: [FeedImage], completion: @escaping (SaveResult) -> Void) {
+        self.store.insertCache(feed.toLocalFeedImages(), timestamp: self.timestampProvider()) { [weak self] (error) in
+            guard self != nil else { return }
+            completion(error)
+        }
+    }
+}
+
+extension LocalFeedLoader {
+    public typealias LoadResult = LoadFeedResult
 
     public func load(completion: @escaping (LoadResult) -> Void) {
         self.store.retrieve { [weak self] (result) in
@@ -48,7 +68,9 @@ public final class LocalFeedLoader {
             }
         }
     }
+}
 
+extension LocalFeedLoader {
     public func validateCache() {
         self.store.retrieve { [weak self] result in
             guard let self = self else { return }
@@ -61,21 +83,6 @@ public final class LocalFeedLoader {
                 break
             }
         }
-    }
-
-    private func cache(_ feed: [FeedImage], completion: @escaping (SaveResult) -> Void) {
-        self.store.insertCache(feed.toLocalFeedImages(), timestamp: self.timestampProvider()) { [weak self] (error) in
-            guard self != nil else { return }
-            completion(error)
-        }
-    }
-
-    private func validateTimestamp(_ timestamp: Date) -> Bool {
-        guard let maxCacheAge = self.calendar.date(byAdding: .day, value: self.maxCacheAgeInDays, to: timestamp)
-        else { return false }
-
-        let currentDate = self.timestampProvider()
-        return currentDate < maxCacheAge
     }
 }
 
