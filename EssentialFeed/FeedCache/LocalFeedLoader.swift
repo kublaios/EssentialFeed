@@ -40,7 +40,6 @@ public final class LocalFeedLoader {
 
             switch result {
             case let .error(error):
-                self.store.deleteCachedFeed { _ in }
                 completion(.failure(error))
             case let .found(feed, timestamp) where self.validateTimestamp(timestamp):
                 completion(.success(feed.toFeedImages()))
@@ -51,6 +50,11 @@ public final class LocalFeedLoader {
                 completion(.success([]))
             }
         }
+    }
+
+    public func validateCache() {
+        self.store.retrieve { _ in }
+        self.store.deleteCachedFeed { _ in }
     }
 
     private func cache(_ feed: [FeedImage], completion: @escaping (SaveResult) -> Void) {
