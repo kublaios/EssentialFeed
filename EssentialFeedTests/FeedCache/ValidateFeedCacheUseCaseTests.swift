@@ -89,8 +89,8 @@ class ValidateFeedCacheUseCaseTests: XCTestCase {
     {
         let store = FeedStoreSpy.init()
         let sut = LocalFeedLoader.init(store: store, timestampProvider: timestampProvider)
-        self.trackForMemoryLeak(store, file: file, line: line)
-        self.trackForMemoryLeak(sut, file: file, line: line)
+        self.trackForMemoryLeaks(store, file: file, line: line)
+        self.trackForMemoryLeaks(sut, file: file, line: line)
         return (sut, store)
     }
 
