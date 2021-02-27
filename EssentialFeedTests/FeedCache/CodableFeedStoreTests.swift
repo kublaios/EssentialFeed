@@ -165,32 +165,19 @@ class CodableFeedStoreTests: XCTestCase {
 
     func test_delete_emtpyCache_hasNoSideEffects() {
         let sut = self.makeSUT()
-        let exp = self.expectation(description: "Waiting for cache deletion")
 
-        var deletionError: Error?
-        sut.deleteCachedFeed { (capturedError) in
-            deletionError = capturedError
-            exp.fulfill()
-        }
-        self.wait(for: [exp], timeout: 1.0)
-
-        XCTAssertNil(deletionError, "Deleting cache failed with \(deletionError!.localizedDescription)")
+        let deletionError = self.deleteCache(using: sut)
+        XCTAssertNil(deletionError, "Deleting empty cache failed with \(deletionError!.localizedDescription)")
         self.expect(sut, toRetrieve: .empty)
     }
 
     func test_delete_nonEmptyCache_deletesExistingCache() {
         let sut = self.makeSUT()
+
         self.insert((uniqueImagesFeed().local, Date()), using: sut)
 
-        var deletionError: Error?
-        let exp = self.expectation(description: "Waiting for cache deletion")
-        sut.deleteCachedFeed { (capturedError) in
-            deletionError = capturedError
-            exp.fulfill()
-        }
-        self.wait(for: [exp], timeout: 1.0)
-
-        XCTAssertNil(deletionError, "Deleting cache failed with \(deletionError!.localizedDescription)")
+        let deletionError = self.deleteCache(using: sut)
+        XCTAssertNil(deletionError, "Deleting existing cache failed with \(deletionError!.localizedDescription)")
         self.expect(sut, toRetrieve: .empty)
     }
 
@@ -240,6 +227,22 @@ class CodableFeedStoreTests: XCTestCase {
         }
 
         self.wait(for: [exp], timeout: 1.0)
+    }
+
+    private func deleteCache(using sut: CodableFeedStore,
+                             file: StaticString = #filePath,
+                             line: UInt = #line)
+    -> Error?
+    {
+        var deletionError: Error?
+        let exp = self.expectation(description: "Waiting for cache deletion")
+        sut.deleteCachedFeed { (capturedError) in
+            deletionError = capturedError
+            exp.fulfill()
+        }
+        self.wait(for: [exp], timeout: 1.0)
+
+        return deletionError
     }
 
     private func makeSUT(storeURL: URL? = nil, file: StaticString = #filePath, line: UInt = #line) -> CodableFeedStore {
