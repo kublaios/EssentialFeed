@@ -128,13 +128,18 @@ class CodableFeedStoreTests: XCTestCase {
 
     // MARK: Private methods
 
-    private func insert(_ cache: (expectedFeed: [LocalFeedImage], expectedTimestamp: Date), using sut: CodableFeedStore) {
+    @discardableResult
+    private func insert(_ cache: (expectedFeed: [LocalFeedImage], expectedTimestamp: Date), using sut: CodableFeedStore)
+    -> Error? {
         let exp = self.expectation(description: "Wait for insertion to CodableFeedStore")
+        var capturedError: Error?
         sut.insertCache(cache.expectedFeed, timestamp: cache.expectedTimestamp) { (insertionError) in
-            XCTAssertNil(insertionError, "Expected cache insertion to succeed, failed with \(insertionError!.localizedDescription)")
+            capturedError = insertionError
             exp.fulfill()
         }
         self.wait(for: [exp], timeout: 1.0)
+
+        return capturedError
     }
 
     private func expect(_ sut: CodableFeedStore, toRetrieveTwice expectedResult: RetrieveCachedFeedResult,
