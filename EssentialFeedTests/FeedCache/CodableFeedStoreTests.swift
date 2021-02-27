@@ -117,6 +117,15 @@ class CodableFeedStoreTests: XCTestCase {
         self.expect(sut, toRetrieve: .error(anyNSError()))
     }
 
+    func test_retrieve_deliversFailure_onRetrievalError_withoutSideEffects() {
+        let storeURL = self.testSpecificStoreURL()
+        let sut = self.makeSUT(storeURL: storeURL)
+
+        try? "invalid-json".data(using: .utf8)?.write(to: storeURL)
+
+        self.expect(sut, toRetrieveTwice: .error(anyNSError()))
+    }
+
     // MARK: Private methods
 
     private func insert(_ cache: (expectedFeed: [LocalFeedImage], expectedTimestamp: Date), using sut: CodableFeedStore) {
