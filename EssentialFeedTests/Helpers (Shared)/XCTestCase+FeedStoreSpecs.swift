@@ -9,6 +9,110 @@ import XCTest
 import EssentialFeed
 
 extension FeedStoreSpecs where Self: XCTestCase {
+    func assertThatRetrieveDeliversEmptyResultOnEmptyCache(on sut: FeedStore) {
+        self.expect(sut, toRetrieve: .empty)
+    }
+
+    func assertThatRetrieveHasNoSideEffectsOnEmptyCache(on sut: FeedStore) {
+        self.expect(sut, toRetrieveTwice: .empty)
+    }
+
+    func assertThatRetrieveDeliversFoundValuesOnNonEmptyCache(on sut: FeedStore) {
+        let (expectedFeed, expectedTimestamp) = (uniqueImagesFeed().local, Date())
+
+        self.insert((expectedFeed, expectedTimestamp), using: sut)
+
+        self.expect(sut, toRetrieve: .found(feed: expectedFeed, timestamp: expectedTimestamp))
+    }
+
+    func assertThatRetrieveHasNoSideEffectsAfterInsertingToEmptyCache(on sut: FeedStore) {
+        let (expectedFeed, expectedTimestamp) = (uniqueImagesFeed().local, Date())
+
+        self.insert((expectedFeed, expectedTimestamp), using: sut)
+
+        self.expect(sut, toRetrieveTwice: .found(feed: expectedFeed, timestamp: expectedTimestamp))
+    }
+
+    func assertThatInsertDeliversNoErrorOnEmptyCache(on sut: FeedStore) {
+        let (feed, timestamp) = (uniqueImagesFeed().local, Date())
+
+        let insertionError = self.insert((feed, timestamp), using: sut)
+
+        XCTAssertNil(insertionError, "Cache insertion failed with \(insertionError!.localizedDescription)")
+    }
+
+    func assertThatInsertDeliversNoErrorOnNonEmptyCache(on sut: FeedStore) {
+        let (feed, timestamp) = (uniqueImagesFeed().local, Date())
+        self.insert((feed, timestamp), using: sut)
+
+        let insertionError = self.insert((uniqueImagesFeed().local, Date()), using: sut)
+
+        XCTAssertNil(insertionError, "Cache insertion failed with \(insertionError!.localizedDescription)")
+    }
+
+    func assertThatInsertUponNonEmptyCacheOverridesCacheWithoutSideEffects(on sut: FeedStore) {
+        self.insert((uniqueImagesFeed().local, Date()), using: sut)
+
+        let (latestFeed, latestTimestamp) = (uniqueImagesFeed().local, Date())
+        self.insert((latestFeed, latestTimestamp), using: sut)
+
+        self.expect(sut, toRetrieve: .found(feed: latestFeed, timestamp: latestTimestamp))
+    }
+
+    func assertThatDeleteEmtpyCacheCompletesWithoutError(on sut: FeedStore) {
+        let deletionError = self.deleteCache(using: sut)
+
+        XCTAssertNil(deletionError, "Deleting empty cache failed with \(deletionError!.localizedDescription)")
+    }
+
+    func assertThatDeleteEmtpyCacheHasNoSideEffects(on sut: FeedStore) {
+        self.deleteCache(using: sut)
+
+        self.expect(sut, toRetrieve: .empty)
+    }
+
+    func assertThatDeleteNonEmptyCacheDeletesExistingCache(on sut: FeedStore) {
+        self.insert((uniqueImagesFeed().local, Date()), using: sut)
+        let deletionError = self.deleteCache(using: sut)
+
+        XCTAssertNil(deletionError, "Deleting existing cache failed with \(deletionError!.localizedDescription)")
+    }
+
+    func assertThatDeleteNonEmptyCacheDeletesExistingCacheWithoutSideEffects(on sut: FeedStore) {
+        self.insert((uniqueImagesFeed().local, Date()), using: sut)
+        self.deleteCache(using: sut)
+
+        self.expect(sut, toRetrieve: .empty)
+    }
+
+    func assertThatStoreSideEffectsRunSerially(on sut: FeedStore) {
+        var operations: [XCTestExpectation] = []
+
+        let op1 = self.expectation(description: "Operation 1")
+        sut.insertCache(uniqueImagesFeed().local, timestamp: Date(), completion: { (_) in
+            operations.append(op1)
+            op1.fulfill()
+        })
+
+        let op2 = self.expectation(description: "Operation 2")
+        sut.deleteCachedFeed { (_) in
+            operations.append(op2)
+            op2.fulfill()
+        }
+
+        let op3 = self.expectation(description: "Operation 3")
+        sut.insertCache(uniqueImagesFeed().local, timestamp: Date(), completion: { (_) in
+            operations.append(op3)
+            op3.fulfill()
+        })
+
+        self.wait(for: [op1, op2, op3], timeout: 5.0)
+
+        XCTAssertEqual(operations, [op1, op2, op3])
+    }
+}
+
+extension FeedStoreSpecs where Self: XCTestCase {
     @discardableResult
     func insert(_ cache: (expectedFeed: [LocalFeedImage], expectedTimestamp: Date), using sut: FeedStore)
     -> Error? {
