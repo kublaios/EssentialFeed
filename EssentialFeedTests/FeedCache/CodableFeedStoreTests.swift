@@ -22,7 +22,7 @@ class CodableFeedStoreTests: XCTestCase {
         self.removeStoreSideEffects()
     }
 
-    func test_deliversEmptyResultOnEmptyCache() {
+    func test_retrieve_deliversEmptyResultOnEmptyCache() {
         let sut = self.makeSUT()
 
         self.expect(sut, toRetrieve: .empty)
