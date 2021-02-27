@@ -157,13 +157,13 @@ class CodableFeedStoreTests: XCTestCase {
     }
 
     func test_insert_deliversError_onInsertionFailure() {
-        let prohibitedStoreURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
-        let sut = self.makeSUT(storeURL: prohibitedStoreURL)
+        let invalidStoreURL = URL(string: "invalid://store-url")!
+        let sut = self.makeSUT(storeURL: invalidStoreURL)
         let (anyValidFeed, anyValidTimestamp) = (uniqueImagesFeed().local, Date())
 
         let insertionError = self.insert((anyValidFeed, anyValidTimestamp), using: sut)
 
-        XCTAssertNotNil(insertionError, "Expected insertion error, received nil instead")
+        XCTAssertNotNil(insertionError, "Expected insertion error, received no error instead")
         self.expect(sut, toRetrieve: .empty)
     }
 
