@@ -126,6 +126,20 @@ class CodableFeedStoreTests: XCTestCase {
         self.expect(sut, toRetrieveTwice: .error(anyNSError()))
     }
 
+    func test_insert_uponNonEmptyCache_overridesCache() {
+        let sut = self.makeSUT()
+
+        let (oldFeed, oldTimestamp) = (uniqueImagesFeed().local, Date())
+        let firstInsertionError = self.insert((oldFeed, oldTimestamp), using: sut)
+        XCTAssertNil(firstInsertionError, "Cache insertion failed with \(firstInsertionError!.localizedDescription)")
+
+        let (latestFeed, latestTimestamp) = (uniqueImagesFeed().local, Date())
+        let secondInsertionError = self.insert((latestFeed, latestTimestamp), using: sut)
+        XCTAssertNil(secondInsertionError, "Overriding cache failed with \(secondInsertionError!.localizedDescription)")
+
+        self.expect(sut, toRetrieve: .found(feed: latestFeed, timestamp: latestTimestamp))
+    }
+
     // MARK: Private methods
 
     @discardableResult
