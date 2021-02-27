@@ -52,7 +52,7 @@ class CodableFeedStoreTests: XCTestCase, FailableFeedStoreSpecs {
 
         try? "invalid-json".data(using: .utf8)?.write(to: storeURL)
 
-        self.expect(sut, toRetrieve: .error(anyNSError()))
+        self.assertThatRetrieveDeliversErrorOnRetrievalFailure(on: sut)
     }
 
     func test_retrieve_deliversFailure_onRetrievalError_withoutSideEffects() {
@@ -61,7 +61,7 @@ class CodableFeedStoreTests: XCTestCase, FailableFeedStoreSpecs {
 
         try? "invalid-json".data(using: .utf8)?.write(to: storeURL)
 
-        self.expect(sut, toRetrieveTwice: .error(anyNSError()))
+        self.assertThatRetrieveDeliversFailureOnRetrievalErrorWithoutSideEffects(on: sut)
     }
 
     func test_insert_deliversNoError_onEmptyCache() {
