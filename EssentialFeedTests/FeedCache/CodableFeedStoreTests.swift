@@ -90,12 +90,7 @@ class CodableFeedStoreTests: XCTestCase {
         let sut = self.makeSUT()
         let (expectedFeed, expectedTimestamp) = (uniqueImagesFeed().local, Date())
 
-        let exp = self.expectation(description: "Wait for insertion to CodableFeedStore")
-        sut.insertCache(expectedFeed, timestamp: expectedTimestamp) { (insertionError) in
-            XCTAssertNil(insertionError, "Expected cache insertion to succeed, failed with \(insertionError!.localizedDescription)")
-            exp.fulfill()
-        }
-        self.wait(for: [exp], timeout: 1.0)
+        self.insert((expectedFeed, expectedTimestamp), using: sut)
 
         self.expect(sut, toRetrieve: .found(feed: expectedFeed, timestamp: expectedTimestamp))
     }
@@ -104,17 +99,21 @@ class CodableFeedStoreTests: XCTestCase {
         let sut = self.makeSUT()
         let (expectedFeed, expectedTimestamp) = (uniqueImagesFeed().local, Date())
 
-        let exp = self.expectation(description: "Wait for insertion to CodableFeedStore")
-        sut.insertCache(expectedFeed, timestamp: expectedTimestamp) { (insertionError) in
-            XCTAssertNil(insertionError, "Expected cache insertion to succeed, failed with \(insertionError!.localizedDescription)")
-            exp.fulfill()
-        }
-        self.wait(for: [exp], timeout: 1.0)
+        self.insert((expectedFeed, expectedTimestamp), using: sut)
 
         self.expect(sut, toRetrieveTwice: .found(feed: expectedFeed, timestamp: expectedTimestamp))
     }
 
     // MARK: Private methods
+
+    private func insert(_ cache: (expectedFeed: [LocalFeedImage], expectedTimestamp: Date), using sut: CodableFeedStore) {
+        let exp = self.expectation(description: "Wait for insertion to CodableFeedStore")
+        sut.insertCache(cache.expectedFeed, timestamp: cache.expectedTimestamp) { (insertionError) in
+            XCTAssertNil(insertionError, "Expected cache insertion to succeed, failed with \(insertionError!.localizedDescription)")
+            exp.fulfill()
+        }
+        self.wait(for: [exp], timeout: 1.0)
+    }
 
     private func expect(_ sut: CodableFeedStore, toRetrieveTwice expectedResult: RetrieveCachedFeedResult,
                         file: StaticString = #filePath,
