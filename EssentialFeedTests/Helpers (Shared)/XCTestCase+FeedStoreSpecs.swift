@@ -9,83 +9,83 @@ import XCTest
 import EssentialFeed
 
 extension FeedStoreSpecs where Self: XCTestCase {
-    func assertThatRetrieveDeliversEmptyResultOnEmptyCache(on sut: FeedStore) {
-        self.expect(sut, toRetrieve: .empty)
+    func assertThatRetrieveDeliversEmptyResultOnEmptyCache(on sut: FeedStore, file: StaticString = #filePath, line: UInt = #line) {
+        self.expect(sut, toRetrieve: .empty, file: file, line: line)
     }
 
-    func assertThatRetrieveHasNoSideEffectsOnEmptyCache(on sut: FeedStore) {
-        self.expect(sut, toRetrieveTwice: .empty)
+    func assertThatRetrieveHasNoSideEffectsOnEmptyCache(on sut: FeedStore, file: StaticString = #filePath, line: UInt = #line) {
+        self.expect(sut, toRetrieveTwice: .empty, file: file, line: line)
     }
 
-    func assertThatRetrieveDeliversFoundValuesOnNonEmptyCache(on sut: FeedStore) {
+    func assertThatRetrieveDeliversFoundValuesOnNonEmptyCache(on sut: FeedStore, file: StaticString = #filePath, line: UInt = #line) {
         let (expectedFeed, expectedTimestamp) = (uniqueImagesFeed().local, Date())
 
         self.insert((expectedFeed, expectedTimestamp), using: sut)
 
-        self.expect(sut, toRetrieve: .found(feed: expectedFeed, timestamp: expectedTimestamp))
+        self.expect(sut, toRetrieve: .found(feed: expectedFeed, timestamp: expectedTimestamp), file: file, line: line)
     }
 
-    func assertThatRetrieveHasNoSideEffectsAfterInsertingToEmptyCache(on sut: FeedStore) {
+    func assertThatRetrieveHasNoSideEffectsAfterInsertingToEmptyCache(on sut: FeedStore, file: StaticString = #filePath, line: UInt = #line) {
         let (expectedFeed, expectedTimestamp) = (uniqueImagesFeed().local, Date())
 
         self.insert((expectedFeed, expectedTimestamp), using: sut)
 
-        self.expect(sut, toRetrieveTwice: .found(feed: expectedFeed, timestamp: expectedTimestamp))
+        self.expect(sut, toRetrieveTwice: .found(feed: expectedFeed, timestamp: expectedTimestamp), file: file, line: line)
     }
 
-    func assertThatInsertDeliversNoErrorOnEmptyCache(on sut: FeedStore) {
+    func assertThatInsertDeliversNoErrorOnEmptyCache(on sut: FeedStore, file: StaticString = #filePath, line: UInt = #line) {
         let (feed, timestamp) = (uniqueImagesFeed().local, Date())
 
         let insertionError = self.insert((feed, timestamp), using: sut)
 
-        XCTAssertNil(insertionError, "Cache insertion failed with \(insertionError!.localizedDescription)")
+        XCTAssertNil(insertionError, "Cache insertion failed with \(insertionError!.localizedDescription)", file: file, line: line)
     }
 
-    func assertThatInsertDeliversNoErrorOnNonEmptyCache(on sut: FeedStore) {
+    func assertThatInsertDeliversNoErrorOnNonEmptyCache(on sut: FeedStore, file: StaticString = #filePath, line: UInt = #line) {
         let (feed, timestamp) = (uniqueImagesFeed().local, Date())
         self.insert((feed, timestamp), using: sut)
 
         let insertionError = self.insert((uniqueImagesFeed().local, Date()), using: sut)
 
-        XCTAssertNil(insertionError, "Cache insertion failed with \(insertionError!.localizedDescription)")
+        XCTAssertNil(insertionError, "Cache insertion failed with \(insertionError!.localizedDescription)", file: file, line: line)
     }
 
-    func assertThatInsertUponNonEmptyCacheOverridesCacheWithoutSideEffects(on sut: FeedStore) {
+    func assertThatInsertUponNonEmptyCacheOverridesCacheWithoutSideEffects(on sut: FeedStore, file: StaticString = #filePath, line: UInt = #line) {
         self.insert((uniqueImagesFeed().local, Date()), using: sut)
 
         let (latestFeed, latestTimestamp) = (uniqueImagesFeed().local, Date())
         self.insert((latestFeed, latestTimestamp), using: sut)
 
-        self.expect(sut, toRetrieve: .found(feed: latestFeed, timestamp: latestTimestamp))
+        self.expect(sut, toRetrieve: .found(feed: latestFeed, timestamp: latestTimestamp), file: file, line: line)
     }
 
-    func assertThatDeleteEmtpyCacheCompletesWithoutError(on sut: FeedStore) {
+    func assertThatDeleteEmtpyCacheCompletesWithoutError(on sut: FeedStore, file: StaticString = #filePath, line: UInt = #line) {
         let deletionError = self.deleteCache(using: sut)
 
-        XCTAssertNil(deletionError, "Deleting empty cache failed with \(deletionError!.localizedDescription)")
+        XCTAssertNil(deletionError, "Deleting empty cache failed with \(deletionError!.localizedDescription)", file: file, line: line)
     }
 
-    func assertThatDeleteEmtpyCacheHasNoSideEffects(on sut: FeedStore) {
+    func assertThatDeleteEmtpyCacheHasNoSideEffects(on sut: FeedStore, file: StaticString = #filePath, line: UInt = #line) {
         self.deleteCache(using: sut)
 
         self.expect(sut, toRetrieve: .empty)
     }
 
-    func assertThatDeleteNonEmptyCacheDeletesExistingCache(on sut: FeedStore) {
+    func assertThatDeleteNonEmptyCacheDeletesExistingCache(on sut: FeedStore, file: StaticString = #filePath, line: UInt = #line) {
         self.insert((uniqueImagesFeed().local, Date()), using: sut)
         let deletionError = self.deleteCache(using: sut)
 
-        XCTAssertNil(deletionError, "Deleting existing cache failed with \(deletionError!.localizedDescription)")
+        XCTAssertNil(deletionError, "Deleting existing cache failed with \(deletionError!.localizedDescription)", file: file, line: line)
     }
 
-    func assertThatDeleteNonEmptyCacheDeletesExistingCacheWithoutSideEffects(on sut: FeedStore) {
+    func assertThatDeleteNonEmptyCacheDeletesExistingCacheWithoutSideEffects(on sut: FeedStore, file: StaticString = #filePath, line: UInt = #line) {
         self.insert((uniqueImagesFeed().local, Date()), using: sut)
         self.deleteCache(using: sut)
 
-        self.expect(sut, toRetrieve: .empty)
+        self.expect(sut, toRetrieve: .empty, file: file, line: line)
     }
 
-    func assertThatStoreSideEffectsRunSerially(on sut: FeedStore) {
+    func assertThatStoreSideEffectsRunSerially(on sut: FeedStore, file: StaticString = #filePath, line: UInt = #line) {
         var operations: [XCTestExpectation] = []
 
         let op1 = self.expectation(description: "Operation 1")
@@ -108,7 +108,7 @@ extension FeedStoreSpecs where Self: XCTestCase {
 
         self.wait(for: [op1, op2, op3], timeout: 5.0)
 
-        XCTAssertEqual(operations, [op1, op2, op3])
+        XCTAssertEqual(operations, [op1, op2, op3], file: file, line: line)
     }
 }
 
