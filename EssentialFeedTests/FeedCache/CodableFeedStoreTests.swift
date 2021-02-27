@@ -56,11 +56,15 @@ class CodableFeedStore {
     }
 
     func insertCache(_ feed: [LocalFeedImage], timestamp: Date, completion: @escaping FeedStore.InsertionCompletion) {
-        let cache = Cache(feed: feed.map(CodableFeedImage.init), timestamp: timestamp)
-        let encoder = JSONEncoder.init()
-        let data = try! encoder.encode(cache)
-        try! data.write(to: self.storeURL)
-        completion(nil)
+        do {
+            let cache = Cache(feed: feed.map(CodableFeedImage.init), timestamp: timestamp)
+            let encoder = JSONEncoder.init()
+            let data = try encoder.encode(cache)
+            try data.write(to: self.storeURL)
+            completion(nil)
+        } catch {
+            completion(error)
+        }
     }
 }
 
@@ -138,6 +142,17 @@ class CodableFeedStoreTests: XCTestCase {
         XCTAssertNil(secondInsertionError, "Overriding cache failed with \(secondInsertionError!.localizedDescription)")
 
         self.expect(sut, toRetrieve: .found(feed: latestFeed, timestamp: latestTimestamp))
+    }
+
+    func test_insert_deliversError_onInsertionError() {
+        let prohibitedStoreURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+        let sut = self.makeSUT(storeURL: prohibitedStoreURL)
+        let (anyValidFeed, anyValidTimestamp) = (uniqueImagesFeed().local, Date())
+
+        let insertionError = self.insert((anyValidFeed, anyValidTimestamp), using: sut)
+
+        XCTAssertNotNil(insertionError, "Expected insertion error, received nil instead")
+        self.expect(sut, toRetrieve: .empty)
     }
 
     // MARK: Private methods
