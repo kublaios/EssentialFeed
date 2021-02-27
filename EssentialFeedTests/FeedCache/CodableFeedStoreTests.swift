@@ -121,6 +121,33 @@ class CodableFeedStoreTests: XCTestCase {
         XCTAssertNotNil(deletionError, "Expected deletion error, received no error instead")
     }
 
+    func test_storeSideEffects_runSerially() {
+        var operations: [XCTestExpectation] = []
+        let sut = self.makeSUT()
+
+        let op1 = self.expectation(description: "Operation 1")
+        sut.insertCache(uniqueImagesFeed().local, timestamp: Date(), completion: { (_) in
+            operations.append(op1)
+            op1.fulfill()
+        })
+
+        let op2 = self.expectation(description: "Operation 2")
+        sut.deleteCachedFeed { (_) in
+            operations.append(op2)
+            op2.fulfill()
+        }
+
+        let op3 = self.expectation(description: "Operation 3")
+        sut.insertCache(uniqueImagesFeed().local, timestamp: Date(), completion: { (_) in
+            operations.append(op3)
+            op3.fulfill()
+        })
+
+        self.wait(for: [op1, op2, op3], timeout: 5.0)
+
+        XCTAssertEqual(operations, [op1, op2, op3])
+    }
+
     // MARK: Private methods
 
     @discardableResult
