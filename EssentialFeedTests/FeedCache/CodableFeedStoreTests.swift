@@ -70,16 +70,33 @@ class CodableFeedStoreTests: XCTestCase {
         self.expect(sut, toRetrieveTwice: .error(anyNSError()))
     }
 
-    func test_insert_uponNonEmptyCache_overridesCache() {
+    func test_insert_deliversNoError_onEmptyCache() {
+        let sut = self.makeSUT()
+        let (feed, timestamp) = (uniqueImagesFeed().local, Date())
+
+        let insertionError = self.insert((feed, timestamp), using: sut)
+
+        XCTAssertNil(insertionError, "Cache insertion failed with \(insertionError!.localizedDescription)")
+    }
+
+    func test_insert_deliversNoError_onNonEmptyCache() {
         let sut = self.makeSUT()
 
-        let (oldFeed, oldTimestamp) = (uniqueImagesFeed().local, Date())
-        let firstInsertionError = self.insert((oldFeed, oldTimestamp), using: sut)
-        XCTAssertNil(firstInsertionError, "Cache insertion failed with \(firstInsertionError!.localizedDescription)")
+        let (feed, timestamp) = (uniqueImagesFeed().local, Date())
+        self.insert((feed, timestamp), using: sut)
+
+        let insertionError = self.insert((uniqueImagesFeed().local, Date()), using: sut)
+
+        XCTAssertNil(insertionError, "Cache insertion failed with \(insertionError!.localizedDescription)")
+    }
+
+    func test_insert_uponNonEmptyCache_overridesCache_withoutSideEffects() {
+        let sut = self.makeSUT()
+
+        self.insert((uniqueImagesFeed().local, Date()), using: sut)
 
         let (latestFeed, latestTimestamp) = (uniqueImagesFeed().local, Date())
-        let secondInsertionError = self.insert((latestFeed, latestTimestamp), using: sut)
-        XCTAssertNil(secondInsertionError, "Overriding cache failed with \(secondInsertionError!.localizedDescription)")
+        self.insert((latestFeed, latestTimestamp), using: sut)
 
         self.expect(sut, toRetrieve: .found(feed: latestFeed, timestamp: latestTimestamp))
     }
@@ -92,14 +109,31 @@ class CodableFeedStoreTests: XCTestCase {
         let insertionError = self.insert((anyValidFeed, anyValidTimestamp), using: sut)
 
         XCTAssertNotNil(insertionError, "Expected insertion error, received no error instead")
+    }
+
+    func test_insert_deliversError_onInsertionFailure_withoutSideEffects() {
+        let invalidStoreURL = URL(string: "invalid://store-url")!
+        let sut = self.makeSUT(storeURL: invalidStoreURL)
+        let (anyValidFeed, anyValidTimestamp) = (uniqueImagesFeed().local, Date())
+
+        self.insert((anyValidFeed, anyValidTimestamp), using: sut)
+
         self.expect(sut, toRetrieve: .empty)
+    }
+
+    func test_delete_emtpyCache_completesWithoutError() {
+        let sut = self.makeSUT()
+
+        let deletionError = self.deleteCache(using: sut)
+
+        XCTAssertNil(deletionError, "Deleting empty cache failed with \(deletionError!.localizedDescription)")
     }
 
     func test_delete_emtpyCache_hasNoSideEffects() {
         let sut = self.makeSUT()
 
-        let deletionError = self.deleteCache(using: sut)
-        XCTAssertNil(deletionError, "Deleting empty cache failed with \(deletionError!.localizedDescription)")
+        self.deleteCache(using: sut)
+
         self.expect(sut, toRetrieve: .empty)
     }
 
@@ -107,9 +141,17 @@ class CodableFeedStoreTests: XCTestCase {
         let sut = self.makeSUT()
 
         self.insert((uniqueImagesFeed().local, Date()), using: sut)
-
         let deletionError = self.deleteCache(using: sut)
+
         XCTAssertNil(deletionError, "Deleting existing cache failed with \(deletionError!.localizedDescription)")
+    }
+
+    func test_delete_nonEmptyCache_deletesExistingCache_withoutSideEffects() {
+        let sut = self.makeSUT()
+
+        self.insert((uniqueImagesFeed().local, Date()), using: sut)
+        self.deleteCache(using: sut)
+
         self.expect(sut, toRetrieve: .empty)
     }
 
@@ -196,6 +238,7 @@ class CodableFeedStoreTests: XCTestCase {
         self.wait(for: [exp], timeout: 1.0)
     }
 
+    @discardableResult
     private func deleteCache(using sut: FeedStore,
                              file: StaticString = #filePath,
                              line: UInt = #line)
