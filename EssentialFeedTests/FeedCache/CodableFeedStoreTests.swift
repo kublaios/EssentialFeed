@@ -120,7 +120,7 @@ class CodableFeedStoreTests: XCTestCase {
         self.expect(sut, toRetrieveTwice: .found(feed: expectedFeed, timestamp: expectedTimestamp))
     }
 
-    func test_retrieve_deliversFailure_onRetrievalError() {
+    func test_retrieve_deliversError_onRetrievalFailure() {
         let storeURL = self.testSpecificStoreURL()
         let sut = self.makeSUT(storeURL: storeURL)
 
@@ -152,7 +152,7 @@ class CodableFeedStoreTests: XCTestCase {
         self.expect(sut, toRetrieve: .found(feed: latestFeed, timestamp: latestTimestamp))
     }
 
-    func test_insert_deliversError_onInsertionError() {
+    func test_insert_deliversError_onInsertionFailure() {
         let prohibitedStoreURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
         let sut = self.makeSUT(storeURL: prohibitedStoreURL)
         let (anyValidFeed, anyValidTimestamp) = (uniqueImagesFeed().local, Date())
