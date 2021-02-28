@@ -8,14 +8,14 @@
 import Foundation
 
 public class RemoteFeedLoader: FeedLoader {
-    private let client: HTTPClient
-    private let url: URL
-
     public enum Error: Swift.Error {
         case connectivity, invalidData
     }
 
     public typealias Result = LoadFeedResult
+
+    private let client: HTTPClient
+    private let url: URL
 
     public init(url: URL, client: HTTPClient) {
         self.url = url
