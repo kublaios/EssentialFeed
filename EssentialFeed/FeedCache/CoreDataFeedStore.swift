@@ -7,16 +7,16 @@
 
 import Foundation
 
-class CoreDataFeedStore: FeedStore {
-    func deleteCachedFeed(completion: @escaping DeletionCompletion) {
+public class CoreDataFeedStore: FeedStore {
+    public func deleteCachedFeed(completion: @escaping DeletionCompletion) {
 
     }
 
-    func insertCache(_ feed: [LocalFeedImage], timestamp: Date, completion: @escaping InsertionCompletion) {
+    public func insertCache(_ feed: [LocalFeedImage], timestamp: Date, completion: @escaping InsertionCompletion) {
 
     }
 
-    func retrieve(completion: @escaping RetrievalCompletion) {
+    public func retrieve(completion: @escaping RetrievalCompletion) {
 
     }
 }
