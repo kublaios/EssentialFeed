@@ -8,6 +8,8 @@
 import Foundation
 
 public class CoreDataFeedStore: FeedStore {
+    public init() { }
+
     public func deleteCachedFeed(completion: @escaping DeletionCompletion) {
 
     }
@@ -17,6 +19,6 @@ public class CoreDataFeedStore: FeedStore {
     }
 
     public func retrieve(completion: @escaping RetrievalCompletion) {
-
+        completion(.empty)
     }
 }
