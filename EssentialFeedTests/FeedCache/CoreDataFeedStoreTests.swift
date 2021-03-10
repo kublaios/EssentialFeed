@@ -46,7 +46,9 @@ class CoreDataFeedStoreTests: XCTestCase, FeedStoreSpecs {
     }
 
     func test_insert_uponNonEmptyCache_overridesCache_withoutSideEffects() {
+        let sut = self.makeSUT()
 
+        self.assertThatInsertUponNonEmptyCacheOverridesCacheWithoutSideEffects(on: sut)
     }
 
     func test_delete_emtpyCache_completesWithoutError() {
