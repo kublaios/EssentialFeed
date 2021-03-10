@@ -18,7 +18,7 @@ public class CoreDataFeedStore: FeedStore {
     }
 
     public func deleteCachedFeed(completion: @escaping DeletionCompletion) {
-
+        completion(nil)
     }
 
     public func insertCache(_ feed: [LocalFeedImage], timestamp: Date, completion: @escaping InsertionCompletion) {
