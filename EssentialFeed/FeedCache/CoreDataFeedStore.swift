@@ -12,8 +12,8 @@ public class CoreDataFeedStore: FeedStore {
     private let container: NSPersistentContainer
     private let context: NSManagedObjectContext
 
-    public init(bundle: Bundle = .main) throws {
-        self.container = try NSPersistentContainer.loadAndReturn(modelName: "FeedStore", in: bundle)
+    public init(storeURL: URL, bundle: Bundle = .main) throws {
+        self.container = try NSPersistentContainer.loadAndReturn(modelName: "FeedStore", url: storeURL, in: bundle)
         self.context = self.container.newBackgroundContext()
     }
 
@@ -36,11 +36,14 @@ private extension NSPersistentContainer {
         case failedToLoadPersistentStore(Error)
     }
 
-    class func loadAndReturn(modelName: String, in bundle: Bundle) throws -> NSPersistentContainer {
+    class func loadAndReturn(modelName: String, url: URL, in bundle: Bundle) throws -> NSPersistentContainer {
         guard let momd = NSManagedObjectModel.with(modelName: modelName, in: bundle)
         else { throw LoadError.modelNotFound }
 
+        let description = NSPersistentStoreDescription.init(url: url)
         let container = NSPersistentContainer.init(name: "FeedStore", managedObjectModel: momd)
+        container.persistentStoreDescriptions = [description]
+
         var loadError: Error?
         container.loadPersistentStores { loadError = $1 }
         try loadError.map { throw LoadError.failedToLoadPersistentStore($0) }
