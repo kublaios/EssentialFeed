@@ -102,7 +102,7 @@ class URLSessionHTTPClientTests: XCTestCase {
     {
         let result = self.resultFor(data: data, response: response, error: error)
         switch result {
-        case let .success(data, response):
+        case let .success((data, response)):
             return (data, response)
         default:
             return nil
@@ -130,10 +130,10 @@ class URLSessionHTTPClientTests: XCTestCase {
                            error: NSError?,
                            file: StaticString = #filePath,
                            line: UInt = #line)
-    -> HTTPClientResult
+    -> HTTPClient.Result
     {
         let sut = self.makeSUT(file: file, line: line)
-        var capturedResult: HTTPClientResult!
+        var capturedResult: HTTPClient.Result!
 
         URLProtocolStub.stub(data: data, response: response, error: error)
         let exp = self.expectation(description: "Waiting for get(from:) completion")
