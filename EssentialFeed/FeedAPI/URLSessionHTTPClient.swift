@@ -18,13 +18,15 @@ public class URLSessionHTTPClient: HTTPClient {
 
     public func get(from url: URL, completion: @escaping (HTTPClient.Result) -> Void) {
         self.session.dataTask(with: url) { (data, response, error) in
-            if let e = error {
-                completion(.failure(e))
-            } else if let d = data, let r = response as? HTTPURLResponse {
-                completion(.success((d, r)))
-            } else {
-                completion(.failure(UnexpectedValuesRepresentation()))
-            }
+            completion(Result {
+                if let error = error {
+                    throw error
+                } else if let d = data, let r = response as? HTTPURLResponse {
+                    return (d, r)
+                } else {
+                    throw UnexpectedValuesRepresentation()
+                }
+            })
         }.resume()
     }
 }
