@@ -64,6 +64,40 @@ class EssentialFeedCacheIntegrationTests: XCTestCase {
         self.wait(for: [expLoad], timeout: 1.0)
     }
 
+    func test_load_deliversOverriddenItems() {
+        let sutToSave = self.makeSUT()
+        let sutToOverride = self.makeSUT()
+        let sutToLoad = self.makeSUT()
+        let firstFeed = uniqueImagesFeed().models
+        let latestFeed = uniqueImagesFeed().models
+
+        let expSave = self.expectation(description: "Waiting for feed loader to save")
+        sutToSave.save(firstFeed) { (saveError) in
+            XCTAssertNil(saveError, "Expected feed loader to save successfully.")
+            expSave.fulfill()
+        }
+        self.wait(for: [expSave], timeout: 1.0)
+
+        let expOverride = self.expectation(description: "Waiting for feed loader to override")
+        sutToOverride.save(latestFeed) { (overrideError) in
+            XCTAssertNil(overrideError, "Expected feed loader to override successfully.")
+            expOverride.fulfill()
+        }
+        self.wait(for: [expOverride], timeout: 1.0)
+
+        let expLoad = self.expectation(description: "Waiting for feed loader to load")
+        sutToLoad.load { (loadResult) in
+            switch loadResult {
+            case let .success(loadedFeed):
+                XCTAssertEqual(loadedFeed, latestFeed)
+            default:
+                XCTFail("Expected feed loader to load items, received \(loadResult) instead.")
+            }
+            expLoad.fulfill()
+        }
+        self.wait(for: [expLoad], timeout: 1.0)
+    }
+
     // MARK: Private methods
 
     private func makeSUT(file: StaticString = #filePath, line: UInt = #line) -> LocalFeedLoader {
