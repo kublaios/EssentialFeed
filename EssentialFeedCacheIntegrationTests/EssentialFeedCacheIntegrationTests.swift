@@ -31,13 +31,20 @@ class EssentialFeedCacheIntegrationTests: XCTestCase {
 
     private func makeSUT() -> LocalFeedLoader {
         let bundle = Bundle.init(for: CoreDataFeedStore.self)
-        let cachesDirectory = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first!
-        let storeURL = cachesDirectory.appendingPathComponent("\(type(of: self)).store")
+        let storeURL = self.testSpecificStoreURL()
         let store = try! CoreDataFeedStore.init(storeURL: storeURL, bundle: bundle)
         let sut = LocalFeedLoader.init(store: store, timestampProvider: Date.init)
         self.trackForMemoryLeaks(store)
         self.trackForMemoryLeaks(sut)
         return sut
+    }
+
+    private func testSpecificStoreURL() -> URL {
+        return self.cachesDirectory().appendingPathComponent("\(type(of: self)).store")
+    }
+
+    private func cachesDirectory() -> URL {
+        return FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first!
     }
 
 }
