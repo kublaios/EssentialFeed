@@ -8,7 +8,7 @@
 import Foundation
 import CoreData
 
-internal extension NSPersistentContainer {
+extension NSPersistentContainer {
     private enum LoadError: Error {
         case modelNotFound
         case failedToLoadPersistentStore(Error)
