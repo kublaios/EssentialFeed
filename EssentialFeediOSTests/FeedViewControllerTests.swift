@@ -65,7 +65,7 @@ class FeedViewControllerTests: XCTestCase {
     }
 }
 
-extension FeedViewControllerTests {
+private extension FeedViewControllerTests {
     class FeedLoaderSpy: FeedLoader {
         private(set) var loadCallCount = 0
 
