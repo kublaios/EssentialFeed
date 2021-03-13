@@ -49,10 +49,10 @@ class FeedViewControllerTests: XCTestCase {
         XCTAssertEqual(loader.loadCallCount, 1)
     }
 
-    func test_pullToRefresh_loadsFeed() {
+    func test_userInitiatedFeedReload_loadsFeed() {
         let (sut, loader) = self.makeSUT()
 
-        sut.refreshControl?.simulatePullToRefresh()
+        sut.simulateUserInitiatedFeedReload()
 
         XCTAssertEqual(loader.loadCallCount, 2)
     }
@@ -62,7 +62,7 @@ class FeedViewControllerTests: XCTestCase {
 
         sut.loadViewIfNeeded()
 
-        XCTAssertTrue(sut.refreshControl?.isRefreshing == true)
+        XCTAssertTrue(sut.isShowingLoadingIndicator)
     }
 
     func test_viewDidLoad_hidesLoadingIndicator_whenLoadingIsCompleted() {
@@ -71,24 +71,24 @@ class FeedViewControllerTests: XCTestCase {
         sut.loadViewIfNeeded()
         loader.completeLoading()
 
-        XCTAssertTrue(sut.refreshControl?.isRefreshing == false)
+        XCTAssertFalse(sut.isShowingLoadingIndicator)
     }
 
-    func test_pullToRefresh_showsLoadingIndicator() {
+    func test_userInitiatedFeedReload_showsLoadingIndicator() {
         let (sut, _) = self.makeSUT()
 
-        sut.refreshControl?.simulatePullToRefresh()
+        sut.simulateUserInitiatedFeedReload()
 
-        XCTAssertTrue(sut.refreshControl?.isRefreshing == true)
+        XCTAssertTrue(sut.isShowingLoadingIndicator)
     }
 
-    func test_pullToRefresh_hidesLoadingIndicator_whenLoadingIsCompleted() {
+    func test_userInitiatedFeedReload_hidesLoadingIndicator_whenLoadingIsCompleted() {
         let (sut, loader) = self.makeSUT()
 
-        sut.refreshControl?.simulatePullToRefresh()
+        sut.simulateUserInitiatedFeedReload()
         loader.completeLoading()
 
-        XCTAssertTrue(sut.refreshControl?.isRefreshing == false)
+        XCTAssertFalse(sut.isShowingLoadingIndicator)
     }
 
     // MARK: Private methods
@@ -119,6 +119,16 @@ private extension FeedViewControllerTests {
         func completeLoading() {
             self.completions[0](.success([]))
         }
+    }
+}
+
+private extension FeedViewController {
+    var isShowingLoadingIndicator: Bool {
+        return self.refreshControl?.isRefreshing == true
+    }
+
+    func simulateUserInitiatedFeedReload() {
+        self.refreshControl?.simulatePullToRefresh()
     }
 }
 
