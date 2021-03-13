@@ -53,8 +53,10 @@ class FeedViewControllerTests: XCTestCase {
         let (sut, loader) = self.makeSUT()
 
         sut.simulateUserInitiatedFeedReload()
-
         XCTAssertEqual(loader.loadCallCount, 2)
+
+        sut.simulateUserInitiatedFeedReload()
+        XCTAssertEqual(loader.loadCallCount, 3)
     }
 
     func test_viewDidLoad_showsLoadingIndicator() {
