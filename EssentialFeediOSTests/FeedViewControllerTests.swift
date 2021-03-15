@@ -117,8 +117,8 @@ class FeedViewControllerTests: XCTestCase {
         sut.loadViewIfNeeded()
         loader.completeFeedLoading(with: [image0, image1], at: 0)
 
-        let view0 = sut.feedImageView(at: 0) as? FeedImageCell
-        let view1 = sut.feedImageView(at: 1) as? FeedImageCell
+        let view0 = sut.simulateImageViewVisible(at: 0) as? FeedImageCell
+        let view1 = sut.simulateImageViewVisible(at: 1) as? FeedImageCell
         XCTAssertEqual(view0?.isShowingImageLoadingIndicator, true, "Expected first feed image view to show loading image indicator!")
         XCTAssertEqual(view1?.isShowingImageLoadingIndicator, true, "Expected second feed image view to show loading image indicator!")
 
@@ -139,8 +139,8 @@ class FeedViewControllerTests: XCTestCase {
         sut.loadViewIfNeeded()
         loader.completeFeedLoading(with: [image0, image1], at: 0)
 
-        let view0 = sut.feedImageView(at: 0) as? FeedImageCell
-        let view1 = sut.feedImageView(at: 1) as? FeedImageCell
+        let view0 = sut.simulateImageViewVisible(at: 0) as? FeedImageCell
+        let view1 = sut.simulateImageViewVisible(at: 1) as? FeedImageCell
         XCTAssertEqual(view0?.renderedImageData, .none, "Expected first feed image view to show no image when the image is being loaded!")
         XCTAssertEqual(view1?.renderedImageData, .none, "Expected second feed image view to show no image when the image is being loaded!")
 
@@ -163,8 +163,8 @@ class FeedViewControllerTests: XCTestCase {
         sut.loadViewIfNeeded()
         loader.completeFeedLoading(with: [image0, image1], at: 0)
 
-        let view0 = sut.feedImageView(at: 0) as? FeedImageCell
-        let view1 = sut.feedImageView(at: 1) as? FeedImageCell
+        let view0 = sut.simulateImageViewVisible(at: 0) as? FeedImageCell
+        let view1 = sut.simulateImageViewVisible(at: 1) as? FeedImageCell
         XCTAssertEqual(view0?.isShowingRetryButton, false, "Expected first feed image view to hide retry button when first image is being loaded!")
         XCTAssertEqual(view1?.isShowingRetryButton, false, "Expected second feed image view to hide retry button when second image is being loaded!")
 
@@ -183,7 +183,7 @@ class FeedViewControllerTests: XCTestCase {
         sut.loadViewIfNeeded()
         loader.completeFeedLoading(with: [self.makeImage()], at: 0)
 
-        let view0 = sut.feedImageView(at: 0) as? FeedImageCell
+        let view0 = sut.simulateImageViewVisible(at: 0) as? FeedImageCell
         XCTAssertEqual(view0?.isShowingRetryButton, false, "Expected first feed image view to hide retry button when first image is being loaded!")
 
         loader.completeImageDataLoading(with: "invalid-image-data".data(using: .utf8)!, at: 0)
