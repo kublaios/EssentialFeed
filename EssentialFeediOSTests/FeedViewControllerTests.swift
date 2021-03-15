@@ -228,6 +228,25 @@ class FeedViewControllerTests: XCTestCase {
         XCTAssertEqual(loader.loadedImageURLs, [image0.url, image1.url], "Expected second image URL is being loaded when it is near visible!")
     }
 
+    func test_feedImageView_cancelsImageLoadingWhenNotNearVisibleAnymore() {
+        let image0 = self.makeImage(url: URL(string: "https://image-0-url.com")!)
+        let image1 = self.makeImage(url: URL(string: "https://image-1-url.com")!)
+        let (sut, loader) = self.makeSUT()
+
+        sut.loadViewIfNeeded()
+        loader.completeFeedLoading(with: [image0, image1], at: 0)
+
+        XCTAssertEqual(loader.canceledImageURLRequests, [], "Expected no cancelled image URLs requests until feed image view is not near visible")
+
+        sut.simulateImageViewNearVisible(at: 0)
+        sut.simulateImageViewNotNearVisible(at: 0)
+        XCTAssertEqual(loader.canceledImageURLRequests, [image0.url], "Expected one cancelled image URL request once first image is not near visible anymore")
+
+        sut.simulateImageViewNearVisible(at: 1)
+        sut.simulateImageViewNotNearVisible(at: 1)
+        XCTAssertEqual(loader.canceledImageURLRequests, [image0.url, image1.url], "Expected two cancelled image URL requests once second image is also not near visible anymore")
+    }
+
     // MARK: Private methods
 
     private func makeSUT(file: StaticString = #filePath, line: UInt = #line) -> (FeedViewController, FeedLoaderSpy) {
@@ -352,6 +371,11 @@ private extension FeedViewController {
     func simulateImageViewNearVisible(at index: Int) {
         let index = IndexPath(row: index, section: self.feedItemsSectionIndex)
         self.tableView.prefetchDataSource?.tableView(self.tableView, prefetchRowsAt: [index])
+    }
+
+    func simulateImageViewNotNearVisible(at index: Int) {
+        let index = IndexPath(row: index, section: self.feedItemsSectionIndex)
+        self.tableView.prefetchDataSource?.tableView?(self.tableView, cancelPrefetchingForRowsAt: [index])
     }
 
     func feedImageView(at index: Int) -> UIView? {
