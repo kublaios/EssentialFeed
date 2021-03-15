@@ -200,17 +200,17 @@ class FeedViewControllerTests: XCTestCase {
 
         let view0 = sut.simulateImageViewVisible(at: 0) as? FeedImageCell
         let view1 = sut.simulateImageViewVisible(at: 1) as? FeedImageCell
-        XCTAssertEqual(loader.loadedImageURLs, [image0.url, image1.url])
+        XCTAssertEqual(loader.loadedImageURLs, [image0.url, image1.url], "Expected first and second image URLs are being loaded!")
 
         loader.completeImageDataLoadingWithError(at: 0)
         loader.completeImageDataLoadingWithError(at: 1)
         view0?.simulateUserInitiatedRetryAction()
 
-        XCTAssertEqual(loader.loadedImageURLs, [image0.url, image1.url, image0.url])
+        XCTAssertEqual(loader.loadedImageURLs, [image0.url, image1.url, image0.url], "Expected first image URL is being loaded again!")
 
         view1?.simulateUserInitiatedRetryAction()
 
-        XCTAssertEqual(loader.loadedImageURLs, [image0.url, image1.url, image0.url, image1.url])
+        XCTAssertEqual(loader.loadedImageURLs, [image0.url, image1.url, image0.url, image1.url], "Expected second image URL is being loaded again!")
     }
 
     // MARK: Private methods
