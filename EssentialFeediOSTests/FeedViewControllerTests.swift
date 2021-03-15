@@ -148,9 +148,7 @@ class FeedViewControllerTests: XCTestCase {
 
 private extension FeedViewControllerTests {
     class FeedLoaderSpy: FeedLoader, FeedImageDataLoader {
-
-        // FeedLoader
-
+        // MARK: FeedLoader
         private(set) var completions: [(FeedLoader.Result) -> Void] = []
 
         var loadCallCount: Int  {
@@ -172,17 +170,22 @@ private extension FeedViewControllerTests {
             self.completions[index](.failure(error))
         }
 
-        // FeedImageDataLoader
+        // MARK: FeedImageDataLoader
+        struct TaskSpy: FeedImageDataLoaderTask {
+            let cancelAction: () -> Void
+            func cancel() {
+                self.cancelAction()
+            }
+        }
 
         var loadedImageURLs: [URL] = []
         var canceledImageURLRequests: [URL] = []
 
-        func loadImageData(from url: URL) {
+        func loadImageData(from url: URL) -> FeedImageDataLoaderTask {
             self.loadedImageURLs.append(url)
-        }
-
-        func cancelImageDataLoad(from url: URL) {
-            self.canceledImageURLRequests.append(url)
+            return TaskSpy.init { [weak self] in
+                self?.canceledImageURLRequests.append(url)
+            }
         }
     }
 }
