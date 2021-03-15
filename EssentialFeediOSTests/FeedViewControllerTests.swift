@@ -190,6 +190,29 @@ class FeedViewControllerTests: XCTestCase {
         XCTAssertEqual(view0?.isShowingRetryButton, true, "Expected first feed image view to show retry button when first image is failed to load!")
     }
 
+    func test_feedImageView_retriesLoadingImage() {
+        let image0 = self.makeImage(url: URL(string: "https://image-0-url.com")!)
+        let image1 = self.makeImage(url: URL(string: "https://image-1-url.com")!)
+        let (sut, loader) = self.makeSUT()
+
+        sut.loadViewIfNeeded()
+        loader.completeFeedLoading(with: [image0, image1], at: 0)
+
+        let view0 = sut.simulateImageViewVisible(at: 0) as? FeedImageCell
+        let view1 = sut.simulateImageViewVisible(at: 1) as? FeedImageCell
+        XCTAssertEqual(loader.loadedImageURLs, [image0.url, image1.url])
+
+        loader.completeImageDataLoadingWithError(at: 0)
+        loader.completeImageDataLoadingWithError(at: 1)
+        view0?.simulateUserInitiatedRetryAction()
+
+        XCTAssertEqual(loader.loadedImageURLs, [image0.url, image1.url, image0.url])
+
+        view1?.simulateUserInitiatedRetryAction()
+
+        XCTAssertEqual(loader.loadedImageURLs, [image0.url, image1.url, image0.url, image1.url])
+    }
+
     // MARK: Private methods
 
     private func makeSUT(file: StaticString = #filePath, line: UInt = #line) -> (FeedViewController, FeedLoaderSpy) {
@@ -300,8 +323,9 @@ private extension FeedViewController {
         self.refreshControl?.simulatePullToRefresh()
     }
 
-    func simulateImageViewVisible(at index: Int) {
-        let _ = self.feedImageView(at: index)
+    @discardableResult
+    func simulateImageViewVisible(at index: Int) -> UIView? {
+        return self.feedImageView(at: index)
     }
 
     func simulateImageViewNotVisible(at index: Int) {
@@ -339,6 +363,20 @@ private extension FeedImageCell {
 
     var isShowingRetryButton: Bool {
         return !self.retryButton.isHidden
+    }
+
+    func simulateUserInitiatedRetryAction() {
+        self.retryButton.simulateTap()
+    }
+}
+
+private extension UIButton {
+    func simulateTap() {
+        self.allTargets.forEach { target in
+            self.actions(forTarget: target, forControlEvent: .touchUpInside)?.forEach { action in
+                (target as NSObject).perform(Selector(action))
+            }
+        }
     }
 }
 
