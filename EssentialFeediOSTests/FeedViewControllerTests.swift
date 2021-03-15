@@ -196,7 +196,7 @@ private extension FeedViewController {
     }
 
     var numberOfRenderedFeedItems: Int {
-        return self.tableView.numberOfRows(inSection: self.feedItemsSectionIndex)
+        return self.tableView(self.tableView, numberOfRowsInSection: self.feedItemsSectionIndex)
     }
 
     var feedItemsSectionIndex: Int {
@@ -219,7 +219,7 @@ private extension FeedViewController {
 
     func feedImageView(at index: Int) -> UIView? {
         let index = IndexPath(row: index, section: self.feedItemsSectionIndex)
-        return self.tableView?.dataSource?.tableView(self.tableView, cellForRowAt: index)
+        return self.tableView(self.tableView, cellForRowAt: index)
     }
 }
 
