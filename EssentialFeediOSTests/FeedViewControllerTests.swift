@@ -155,6 +155,28 @@ class FeedViewControllerTests: XCTestCase {
         XCTAssertEqual(view1?.renderedImageData, image1Data, "Expected second feed image view to render loaded image!")
     }
 
+    func test_feedImageView_showsRetryButtonOnImageLoadingError() {
+        let image0 = self.makeImage(url: URL(string: "https://image-0-url.com")!)
+        let image1 = self.makeImage(url: URL(string: "https://image-1-url.com")!)
+        let (sut, loader) = self.makeSUT()
+
+        sut.loadViewIfNeeded()
+        loader.completeFeedLoading(with: [image0, image1], at: 0)
+
+        let view0 = sut.feedImageView(at: 0) as? FeedImageCell
+        let view1 = sut.feedImageView(at: 1) as? FeedImageCell
+        XCTAssertEqual(view0?.isShowingRetryButton, false, "Expected first feed image view to hide retry button when first image is being loaded!")
+        XCTAssertEqual(view1?.isShowingRetryButton, false, "Expected second feed image view to hide retry button when second image is being loaded!")
+
+        loader.completeImageDataLoadingWithError(at: 0)
+        XCTAssertEqual(view0?.isShowingRetryButton, true, "Expected first feed image view to show retry button when first image is failed to load!")
+        XCTAssertEqual(view1?.isShowingRetryButton, false, "Expected second feed image view to hide retry button when second image is being loaded!")
+
+        loader.completeImageDataLoadingWithError(at: 1)
+        XCTAssertEqual(view0?.isShowingRetryButton, true, "Expected first feed image view to show retry button when first image is failed to load!")
+        XCTAssertEqual(view1?.isShowingRetryButton, true, "Expected second feed image view to show retry button when second image is failed to load!")
+    }
+
     // MARK: Private methods
 
     private func makeSUT(file: StaticString = #filePath, line: UInt = #line) -> (FeedViewController, FeedLoaderSpy) {
@@ -300,6 +322,10 @@ private extension FeedImageCell {
 
     var renderedImageData: Data? {
         self.feedImageView.image?.pngData()
+    }
+
+    var isShowingRetryButton: Bool {
+        return !self.retryButton.isHidden
     }
 }
 

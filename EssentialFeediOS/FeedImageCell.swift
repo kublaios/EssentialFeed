@@ -13,4 +13,5 @@ public final class FeedImageCell: UITableViewCell {
     public let descriptionLabel = UILabel.init()
     public let feedImageContainer = UIView()
     public let feedImageView = UIImageView.init()
+    public let retryButton = UIButton.init()
 }
