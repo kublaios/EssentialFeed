@@ -30,9 +30,10 @@ public final class FeedViewController: UITableViewController {
     @objc private func load() {
         self.refreshControl?.beginRefreshing()
         self.loader?.load { [weak self] result in
-            let feed = (try? result.get()) ?? []
-            self?.tableModel = feed
-            self?.tableView.reloadData()
+            if let feed = try? result.get() {
+                self?.tableModel = feed
+                self?.tableView.reloadData()
+            }
             self?.refreshControl?.endRefreshing()
         }
     }
