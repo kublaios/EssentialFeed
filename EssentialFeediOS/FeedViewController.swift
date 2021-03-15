@@ -33,6 +33,8 @@ public final class FeedViewController: UITableViewController {
     public override func viewDidLoad() {
         super.viewDidLoad()
 
+        self.tableView.prefetchDataSource = self
+
         self.refreshControl = UIRefreshControl.init()
         self.refreshControl?.addTarget(self, action: #selector(self.load), for: .valueChanged)
 
@@ -84,5 +86,15 @@ public final class FeedViewController: UITableViewController {
     public override func tableView(_ tableView: UITableView, didEndDisplaying cell: UITableViewCell, forRowAt indexPath: IndexPath) {
         self.tasks[indexPath]?.cancel()
         self.tasks[indexPath] = nil
+    }
+}
+
+extension FeedViewController: UITableViewDataSourcePrefetching {
+    public func tableView(_ tableView: UITableView, prefetchRowsAt indexPaths: [IndexPath]) {
+        indexPaths.forEach { [weak self] (indexPath) in
+            guard let self = self else { return }
+            let imageModel = self.tableModel[indexPath.row]
+            self.tasks[indexPath] = self.imageLoader?.loadImageData(from: imageModel.url) { _ in }
+        }
     }
 }
