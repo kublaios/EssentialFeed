@@ -8,15 +8,6 @@
 import UIKit
 import EssentialFeed
 
-public protocol FeedImageDataLoaderTask {
-    func cancel()
-}
-
-public protocol FeedImageDataLoader {
-    typealias Result = Swift.Result<Data, Error>
-    func loadImageData(from url: URL, completion: @escaping (Result) -> Void) -> FeedImageDataLoaderTask
-}
-
 public final class FeedViewController: UITableViewController {
     private(set) var feedLoader: FeedLoader?
     private(set) var imageLoader: FeedImageDataLoader?
