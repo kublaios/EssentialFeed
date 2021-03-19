@@ -30,11 +30,11 @@ public final class FeedViewController: UITableViewController {
 
     // MARK: Private methods
 
-    private func cancelLoading(at indexPath: IndexPath) {
+    private func cancelCellControllerLoading(forRowAt indexPath: IndexPath) {
         self.tableModel[indexPath.row].cancel()
     }
 
-    private func cellController(at indexPath: IndexPath) -> FeedImageCellController {
+    private func cellController(forRowAt indexPath: IndexPath) -> FeedImageCellController {
         return self.tableModel[indexPath.row]
     }
 
@@ -45,13 +45,13 @@ public final class FeedViewController: UITableViewController {
     }
 
     public override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        return self.cellController(at: indexPath).view()
+        return self.cellController(forRowAt: indexPath).view()
     }
 
     // MARK: UITableViewDelegate
 
     public override func tableView(_ tableView: UITableView, didEndDisplaying cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        self.cancelLoading(at: indexPath)
+        self.cancelCellControllerLoading(forRowAt: indexPath)
     }
 }
 
@@ -60,11 +60,11 @@ public final class FeedViewController: UITableViewController {
 extension FeedViewController: UITableViewDataSourcePrefetching {
     public func tableView(_ tableView: UITableView, prefetchRowsAt indexPaths: [IndexPath]) {
         indexPaths.forEach { [weak self] (indexPath) in
-            self?.cellController(at: indexPath).preload()
+            self?.cellController(forRowAt: indexPath).preload()
         }
     }
 
     public func tableView(_ tableView: UITableView, cancelPrefetchingForRowsAt indexPaths: [IndexPath]) {
-        indexPaths.forEach(self.cancelLoading)
+        indexPaths.forEach(self.cancelCellControllerLoading)
     }
 }
