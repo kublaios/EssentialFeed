@@ -5,7 +5,7 @@
 //  Created by Kubilay Erdogan on 2021-03-19.
 //
 
-import Foundation
+import UIKit
 import EssentialFeed
 
 public final class FeedUIComposer {
@@ -25,7 +25,7 @@ public final class FeedUIComposer {
     {
         return { [weak viewController] (feed) in
             viewController?.tableModel = feed.map {
-                let imageViewModel = FeedImageViewModel.init(model: $0, imageLoader: imageLoader)
+                let imageViewModel = FeedImageViewModel<UIImage>.init(model: $0, imageLoader: imageLoader, imageTransformer: UIImage.init)
                 return FeedImageCellController.init(viewModel: imageViewModel)
             }
         }
