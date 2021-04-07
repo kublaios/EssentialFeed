@@ -42,8 +42,8 @@ private final class WeekRefVirtualProxy<T: AnyObject> {
 }
 
 extension WeekRefVirtualProxy: FeedLoadingView where T: FeedLoadingView {
-    func display(isLoading: Bool) {
-        self.obj?.display(isLoading: isLoading)
+    func display(_ viewModel: FeedLoadingViewModel) {
+        self.obj?.display(viewModel)
     }
 }
 
@@ -56,8 +56,8 @@ private final class FeedViewAdapter: FeedView{
         self.imageLoader = imageLoader
     }
 
-    func display(feed: [FeedImage]) {
-        self.controller?.tableModel = feed.map {
+    func display(_ viewModel: FeedViewModel) {
+        self.controller?.tableModel = viewModel.feed.map {
             let imageViewModel = FeedImageViewModel<UIImage>.init(model: $0, imageLoader: self.imageLoader, imageTransformer: UIImage.init)
             return FeedImageCellController.init(viewModel: imageViewModel)
         }
