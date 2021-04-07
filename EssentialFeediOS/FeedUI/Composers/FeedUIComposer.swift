@@ -12,8 +12,9 @@ public final class FeedUIComposer {
     private init() { }
 
     public class func feedComposedWith(feedLoader: FeedLoader, imageLoader: FeedImageDataLoader) -> FeedViewController {
-        let presenter = FeedPresenter.init(feedLoader: feedLoader)
-        let refreshController = FeedRefreshViewController.init(presenter: presenter)
+        let presenter = FeedPresenter.init()
+        let presentationAdapter = FeedLoaderPresentationAdapter.init(feedLoader: feedLoader, presenter: presenter)
+        let refreshController = FeedRefreshViewController.init(loadFeed: presentationAdapter.loadFeed)
         let feedController = FeedViewController.init(refreshController: refreshController)
         presenter.feedView = FeedViewAdapter.init(viewController: feedController, imageLoader: imageLoader)
         presenter.loadingView = WeekRefVirtualProxy.init(refreshController)
@@ -62,4 +63,27 @@ private final class FeedViewAdapter: FeedView{
             return FeedImageCellController.init(viewModel: imageViewModel)
         }
     }
+}
+
+private final class FeedLoaderPresentationAdapter {
+    let feedLoader: FeedLoader
+    let presenter: FeedPresenter
+
+    init(feedLoader: FeedLoader, presenter: FeedPresenter) {
+        self.feedLoader = feedLoader
+        self.presenter = presenter
+    }
+
+    func loadFeed() {
+        self.presenter.didStartLoadingFeed()
+        self.feedLoader.load { [weak self] result in
+            switch result {
+            case let .success(feed):
+                self?.presenter.didFinishLoading(with: feed)
+            case let .failure(error):
+                self?.presenter.didFinishLoading(with: error)
+            }
+        }
+    }
+
 }
