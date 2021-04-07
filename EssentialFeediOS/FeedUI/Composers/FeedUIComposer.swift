@@ -16,7 +16,7 @@ public final class FeedUIComposer {
         let refreshController = FeedRefreshViewController.init(presenter: presenter)
         let feedController = FeedViewController.init(refreshController: refreshController)
         presenter.feedView = FeedViewAdapter.init(viewController: feedController, imageLoader: imageLoader)
-        presenter.loadingView = refreshController
+        presenter.loadingView = WeekRefVirtualProxy.init(refreshController)
         return feedController
     }
 
@@ -30,6 +30,20 @@ public final class FeedUIComposer {
                 return FeedImageCellController.init(viewModel: imageViewModel)
             }
         }
+    }
+}
+
+private final class WeekRefVirtualProxy<T: AnyObject> {
+    private weak var obj: T?
+
+    init(_ obj: T) {
+        self.obj = obj
+    }
+}
+
+extension WeekRefVirtualProxy: FeedLoadingView where T: FeedLoadingView {
+    func display(isLoading: Bool) {
+        self.obj?.display(isLoading: isLoading)
     }
 }
 
