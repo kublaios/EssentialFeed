@@ -12,11 +12,12 @@ public final class FeedUIComposer {
     private init() { }
 
     public class func feedComposedWith(feedLoader: FeedLoader, imageLoader: FeedImageDataLoader) -> FeedViewController {
-        let feedViewModel = FeedViewModel.init(feedLoader: feedLoader)
-        let refreshController = FeedRefreshViewController.init(viewModel: feedViewModel)
-        let feedVC = FeedViewController.init(refreshController: refreshController)
-        feedViewModel.onFeedLoad = Self.adaptFeedToCellControllers(forwardingTo: feedVC, imageLoader: imageLoader)
-        return feedVC
+        let presenter = FeedPresenter.init(feedLoader: feedLoader)
+        let refreshController = FeedRefreshViewController.init(presenter: presenter)
+        let feedController = FeedViewController.init(refreshController: refreshController)
+        presenter.feedView = FeedViewAdapter.init(viewController: feedController, imageLoader: imageLoader)
+        presenter.loadingView = refreshController
+        return feedController
     }
 
     private class func adaptFeedToCellControllers(forwardingTo viewController: FeedViewController,
@@ -28,6 +29,23 @@ public final class FeedUIComposer {
                 let imageViewModel = FeedImageViewModel<UIImage>.init(model: $0, imageLoader: imageLoader, imageTransformer: UIImage.init)
                 return FeedImageCellController.init(viewModel: imageViewModel)
             }
+        }
+    }
+}
+
+private final class FeedViewAdapter: FeedView{
+    private weak var controller: FeedViewController?
+    private let imageLoader: FeedImageDataLoader
+
+    init(viewController: FeedViewController, imageLoader: FeedImageDataLoader) {
+        self.controller = viewController
+        self.imageLoader = imageLoader
+    }
+
+    func display(feed: [FeedImage]) {
+        self.controller?.tableModel = feed.map {
+            let imageViewModel = FeedImageViewModel<UIImage>.init(model: $0, imageLoader: self.imageLoader, imageTransformer: UIImage.init)
+            return FeedImageCellController.init(viewModel: imageViewModel)
         }
     }
 }
