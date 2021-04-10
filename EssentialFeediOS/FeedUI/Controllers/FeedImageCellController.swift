@@ -39,7 +39,7 @@ final class FeedImageCellController: FeedImageView {
         self.cell?.locationContainer.isHidden = !viewModel.hasLocation
         self.cell?.locationLabel.text = viewModel.location
         self.cell?.descriptionLabel.text = viewModel.description
-        self.cell?.feedImageView.image = viewModel.image
+        self.cell?.feedImageView.setImageAnimated(viewModel.image)
         self.cell?.feedImageContainer.isShimmering = viewModel.isLoading
         self.cell?.feedImageRetryButton.isHidden = !viewModel.shouldRetry
         self.cell?.retryButtonAction = self.delegate.didRequestImage
