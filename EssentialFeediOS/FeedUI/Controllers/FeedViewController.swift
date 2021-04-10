@@ -7,8 +7,12 @@
 
 import UIKit
 
-public final class FeedViewController: UITableViewController {
-    @IBOutlet var refreshController: FeedRefreshViewController?
+protocol FeedViewControllerDelegate {
+    func didRequestFeedRefresh()
+}
+
+public final class FeedViewController: UITableViewController, FeedLoadingView {
+    var delegate: FeedViewControllerDelegate?
 
     var tableModel: [FeedImageCellController] = [] {
         didSet { self.tableView.reloadData() }
@@ -18,7 +22,19 @@ public final class FeedViewController: UITableViewController {
         super.viewDidLoad()
 
         self.tableView.prefetchDataSource = self
-        self.refreshController?.refresh()
+        self.refresh()
+    }
+
+    @IBAction func refresh() {
+        self.delegate?.didRequestFeedRefresh()
+    }
+
+    func display(_ viewModel: FeedLoadingViewModel) {
+        if viewModel.isLoading {
+            self.refreshControl?.beginRefreshing()
+        } else {
+            self.refreshControl?.endRefreshing()
+        }
     }
 
     // MARK: Private methods
