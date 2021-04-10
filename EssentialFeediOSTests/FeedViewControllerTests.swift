@@ -247,6 +247,18 @@ class FeedViewControllerTests: XCTestCase {
         XCTAssertEqual(loader.canceledImageURLRequests, [image0.url, image1.url], "Expected two cancelled image URL requests once second image is also not near visible anymore")
     }
 
+    func test_feedImageView_doesNotRenderLoadedImageWhenNotVisibleAnymore() {
+        let index = 0
+        let (sut, loader) = self.makeSUT()
+        sut.loadViewIfNeeded()
+        loader.completeFeedLoading(with: [self.makeImage()], at: index)
+
+        let view = sut.simulateImageViewNotVisible(at: index)
+        loader.completeImageDataLoading(with: self.anyImageData(), at: index)
+
+        XCTAssertNil(view.renderedImageData, "Expected no rendered image after the view is not visible anymore!")
+    }
+
     // MARK: Private methods
 
     private func makeSUT(file: StaticString = #filePath, line: UInt = #line) -> (FeedViewController, FeedLoaderSpy) {
@@ -281,6 +293,10 @@ class FeedViewControllerTests: XCTestCase {
 
     private func makeImage(description: String? = nil, location: String? = nil, url: URL = URL(string: "https://any-url.com")!) -> FeedImage {
         return FeedImage.init(id: UUID(), description: description, location: location, url: url)
+    }
+
+    private func anyImageData() -> Data {
+        return UIImage.make(withColor: .red).pngData()!
     }
 }
 
@@ -362,10 +378,12 @@ private extension FeedViewController {
         return self.feedImageView(at: index)
     }
 
-    func simulateImageViewNotVisible(at index: Int) {
+    @discardableResult
+    func simulateImageViewNotVisible(at index: Int) -> FeedImageCell {
         let cell = self.feedImageView(at: index) as! FeedImageCell
         let index = IndexPath(row: index, section: self.feedItemsSectionIndex)
         self.tableView(self.tableView, didEndDisplaying: cell, forRowAt: index)
+        return cell
     }
 
     func simulateImageViewNearVisible(at index: Int) {
@@ -406,11 +424,11 @@ private extension FeedImageCell {
     }
 
     var isShowingRetryButton: Bool {
-        return !self.retryButton.isHidden
+        return !self.feedImageRetryButton.isHidden
     }
 
     func simulateUserInitiatedRetryAction() {
-        self.retryButton.simulateTap()
+        self.feedImageRetryButton.simulateTap()
     }
 }
 
