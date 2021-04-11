@@ -31,26 +31,6 @@ private extension FeedViewController {
     }
 }
 
-private final class WeekRefVirtualProxy<T: AnyObject> {
-    private weak var obj: T?
-
-    init(_ obj: T) {
-        self.obj = obj
-    }
-}
-
-extension WeekRefVirtualProxy: FeedLoadingView where T: FeedLoadingView {
-    func display(_ viewModel: FeedLoadingViewModel) {
-        self.obj?.display(viewModel)
-    }
-}
-
-extension WeekRefVirtualProxy: FeedImageView where T: FeedImageView, T.Image == UIImage {
-    func display(_ model: FeedImageViewModel<UIImage>) {
-        self.obj?.display(model)
-    }
-}
-
 private final class FeedViewAdapter: FeedView {
     private weak var controller: FeedViewController?
     private let imageLoader: FeedImageDataLoader
