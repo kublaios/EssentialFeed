@@ -476,12 +476,12 @@
 		3EF7F6292605179B00008E87 /* Composers */ = {
 			isa = PBXGroup;
 			children = (
+				3E3717FA26233C1800596913 /* FeedImageDataLoaderPresentationAdapter.swift */,
+				3E37180226233C4100596913 /* FeedLoaderPresentationAdapter.swift */,
 				3EF7F62A260517A400008E87 /* FeedUIComposer.swift */,
 				3E37180A26233C7000596913 /* FeedViewAdapter.swift */,
 				3E3717EA26233B8A00596913 /* MainQueueDispatchDecorator.swift */,
 				3E3717F226233BE500596913 /* WeakRefVirtualProxy.swift */,
-				3E3717FA26233C1800596913 /* FeedImageDataLoaderPresentationAdapter.swift */,
-				3E37180226233C4100596913 /* FeedLoaderPresentationAdapter.swift */,
 			);
 			path = Composers;
 			sourceTree = "<group>";
