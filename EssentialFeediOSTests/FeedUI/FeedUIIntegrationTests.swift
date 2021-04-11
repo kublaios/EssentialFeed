@@ -268,6 +268,18 @@ class FeedUIIntegrationTests: XCTestCase {
         XCTAssertNil(view.renderedImageData, "Expected no rendered image after the view is not visible anymore!")
     }
 
+    func test_loadFeedCompletion_dispatchesFromBackgroundToMainThread() {
+        let (sut, loader) = self.makeSUT()
+        sut.loadViewIfNeeded()
+
+        let exp = self.expectation(description: "Waiting for Feedloader to complete on the bg queue")
+        DispatchQueue.global().async {
+            loader.completeFeedLoading(at: .zero)
+            exp.fulfill()
+        }
+        self.wait(for: [exp], timeout: 1.0)
+    }
+
     // MARK: Private methods
 
     private func makeSUT(file: StaticString = #filePath, line: UInt = #line) -> (FeedViewController, FeedLoaderSpy) {
