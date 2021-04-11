@@ -1,5 +1,5 @@
 //
-//  FeedViewControllerTests.swift
+//  FeedUIIntegrationTests.swift
 //  EssentialFeediOSTests
 //
 //  Created by Kubilay Erdogan on 2021-03-13.
@@ -10,7 +10,7 @@ import UIKit
 import EssentialFeed
 import EssentialFeediOS
 
-class FeedViewControllerTests: XCTestCase {
+class FeedUIIntegrationTests: XCTestCase {
     func test_feedView_hasTitle() {
         let (sut, _) = self.makeSUT()
 
@@ -309,7 +309,7 @@ class FeedViewControllerTests: XCTestCase {
     }
 }
 
-private extension FeedViewControllerTests {
+private extension FeedUIIntegrationTests {
     class FeedLoaderSpy: FeedLoader, FeedImageDataLoader {
         // MARK: FeedLoader
         private(set) var completions: [(FeedLoader.Result) -> Void] = []
